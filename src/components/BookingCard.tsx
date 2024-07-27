@@ -108,6 +108,7 @@ const BookingCard: React.FC = () => {
     },
     onError: () => {
       toast({
+        variant: "destructive",
         title: "Problem",
         description: `Wystąpił błąd`,
         duration: 4000,
