@@ -1,10 +1,6 @@
 "use client";
 
 import { ModeToggle } from "@/components/theme/ModeToggle";
-import Image from "next/image";
-import Link from "next/link";
-import { Button } from "./ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
 
 const Nav = () => {
   return (

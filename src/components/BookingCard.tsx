@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -43,20 +43,12 @@ const BookingCard: React.FC = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const {
-    data: users,
-    isLoading: isLoadingUsers,
-    isError: isErrorUsers,
-  } = useQuery({
+  const { data: users, isLoading: isLoadingUsers } = useQuery({
     queryKey: ["users"],
     queryFn: async () => await getUsers(),
   });
 
-  const {
-    data: services,
-    isLoading: isLoadingServices,
-    isError: isErrorServices,
-  } = useQuery({
+  const { data: services, isLoading: isLoadingServices } = useQuery({
     queryKey: ["services"],
     queryFn: async () => await getServices(),
   });
@@ -73,11 +65,7 @@ const BookingCard: React.FC = () => {
   const [userId, setUserId] = useState<number | null>(null);
   const [serviceId, setServiceId] = useState<number | null>(null);
 
-  const {
-    refetch: refetchPrice,
-    isLoading: isLoadingPrice,
-    isError: isErrorPrice,
-  } = useQuery({
+  const { refetch: refetchPrice, isLoading: isLoadingPrice } = useQuery({
     queryKey: ["user-service-price", userId, serviceId],
     queryFn: async () => {
       if (userId !== null && serviceId !== null) {
