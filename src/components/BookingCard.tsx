@@ -95,7 +95,7 @@ const BookingCard = ({ user }: PinEntryFormProps) => {
         description: `Wykonanie usługi dodane!`,
         duration: 1000,
       });
-      await queryClient.invalidateQueries({ queryKey: ["servers"] });
+      await queryClient.invalidateQueries({ queryKey: ["bookings"] });
     },
     onError: () => {
       toast({
@@ -119,6 +119,7 @@ const BookingCard = ({ user }: PinEntryFormProps) => {
   useEffect(() => {
     async function fetchPrice() {
       try {
+        form.setValue("userId", user.id);
         if (user.id !== null && serviceId !== null) {
           await refetchPrice();
         }
@@ -127,7 +128,7 @@ const BookingCard = ({ user }: PinEntryFormProps) => {
       }
     }
     fetchPrice().catch(console.error);
-  }, [user, serviceId, refetchPrice]);
+  }, [user, serviceId, refetchPrice, form]);
 
   return (
     <Form {...form}>
@@ -142,10 +143,12 @@ const BookingCard = ({ user }: PinEntryFormProps) => {
                 <Input
                   placeholder="Frygacz"
                   {...field}
-                  value={user.name}
+                  value={user.id}
+                  className="hidden"
                   disabled
                 />
               </FormControl>
+              <p>{user.name}</p>
               <FormDescription>Zalogowany użytkownik</FormDescription>
               <FormMessage />
             </FormItem>
