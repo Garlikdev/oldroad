@@ -11,33 +11,68 @@ type UserServicePrice = {
 export async function getServices() {
   return prisma.service.findMany();
 }
+
+export async function getUserServices(userId: number) {
+  const services = await prisma.service.findMany({
+    where: {
+      prices: {
+        some: {
+          userId,
+        },
+      },
+    },
+  });
+  return services;
+}
+
+// Users
+
 export async function getUsers() {
   return prisma.user.findMany();
 }
+
+export type User = {
+  id: number;
+  name: string;
+  pin: number;
+};
+
+export async function getUser(pin: number) {
+  const userData: User | null = await prisma.user.findUnique({
+    where: { pin },
+  });
+  return userData ? userData : null;
+}
+
+// Usługi
+
 export async function getBookings() {
   return prisma.booking.findMany();
 }
+
 export async function createBooking(data: {
   userId: number;
   serviceId: number;
   price: number;
 }) {
-  const { userId, serviceId, price } = data;
+  try {
+    const { userId, serviceId, price } = data;
 
-  const newBooking = await prisma.booking.create({
-    data: {
-      userId,
-      serviceId,
-      price,
-    },
-  });
+    const newBooking = await prisma.booking.create({
+      data: {
+        userId,
+        serviceId,
+        price,
+      },
+    });
 
-  return newBooking;
+    return newBooking;
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
 }
-export async function getUserServicePrice(
-  userId: number,
-  serviceId: number,
-): Promise<number | null> {
+export async function getUserServicePrice(userId: number, serviceId: number) {
   try {
     const userServicePrice: UserServicePrice | null =
       await prisma.userServicePrice.findUnique({

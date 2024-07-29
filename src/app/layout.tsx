@@ -1,15 +1,15 @@
 import "@/styles/globals.css";
 import Providers from "@/lib/providers";
-// import { Outfit as FontSans } from "next/font/google";
 import Nav from "../components/Nav";
 import { ThemeProvider } from "../components/theme/theme-provider";
 import { GeistSans } from "geist/font/sans";
 import { Toaster } from "@/components/ui/toaster";
-
-// const fontSans = FontSans({
-//   subsets: ["latin"],
-//   variable: "--font-sans",
-// });
+import { getUsers } from "@/lib/actions/service.action";
+import {
+  dehydrate,
+  HydrationBoundary,
+  QueryClient,
+} from "@tanstack/react-query";
 
 export const metadata = {
   title: "Old Road POS",
@@ -17,11 +17,17 @@ export const metadata = {
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const queryClient = new QueryClient();
+
+  await queryClient.prefetchQuery({
+    queryKey: ["users"],
+    queryFn: () => getUsers(),
+  });
   return (
     <html
       className={`${GeistSans.variable}`}
@@ -30,16 +36,18 @@ export default function RootLayout({
     >
       <body className="relative min-h-screen bg-background bg-neutral-200 bg-opacity-50 font-sans text-neutral-950 antialiased dark:bg-neutral-900 dark:text-neutral-50 dark:text-opacity-90">
         <Providers>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <Nav />
-            {children}
-            <Toaster />
-          </ThemeProvider>
+          <HydrationBoundary state={dehydrate(queryClient)}>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <Nav />
+              {children}
+              <Toaster />
+            </ThemeProvider>
+          </HydrationBoundary>
         </Providers>
       </body>
     </html>

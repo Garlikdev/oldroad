@@ -1,19 +1,36 @@
-import BookingCard from "@/components/BookingCard";
+"use client";
+
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getUsers } from "@/lib/actions/service.action";
-import {
-  dehydrate,
-  HydrationBoundary,
-  QueryClient,
-} from "@tanstack/react-query";
+import BookingCard from "@/components/BookingCard";
+import { PinEntryForm } from "@/components/PinEntryForm";
+import { Button } from "@/components/ui/button";
 
-export default async function HomePage() {
-  const queryClient = new QueryClient();
+type User = {
+  name: string;
+  id: number;
+  pin: number;
+};
 
-  await queryClient.prefetchQuery({
-    queryKey: ["users"],
-    queryFn: () => getUsers(),
-  });
+export default function HomePage() {
+  const [user, setUser] = useState<User | null>(null);
+
+  const handleLogin = (userInfo: User) => {
+    setUser(userInfo);
+    localStorage.setItem("loggedInUser", JSON.stringify(userInfo));
+  };
+
+  useEffect(() => {
+    const savedUser = localStorage.getItem("loggedInUser");
+    if (savedUser) {
+      setUser(JSON.parse(savedUser) as User);
+    }
+  }, []);
+
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem("loggedInUser");
+  };
 
   return (
     <main className="relative flex min-h-screen w-full flex-col items-center gap-4 overflow-hidden bg-background py-4">
@@ -25,14 +42,25 @@ export default async function HomePage() {
       <div className="absolute left-[550px] top-[150px] z-[6] h-[250px] w-[350px] -rotate-[35deg] rounded-full bg-[#ffffff] opacity-30 blur-[60px]"></div>
       <div className="container flex gap-4">
         <div className="z-10 flex w-full flex-col gap-4">
-          <Card className="relative z-10 w-full bg-background/50">
+          <Card className="relative z-10 w-full bg-background/80">
             <CardHeader className="text-center">
-              <CardTitle>Nowy serwis</CardTitle>
+              <CardTitle>
+                {user && (
+                  <div className="flex items-center justify-center gap-4">
+                    <h1>{user.name}</h1>
+                    <Button className="px-2" onClick={handleLogout}>
+                      Wyloguj
+                    </Button>
+                  </div>
+                )}
+              </CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col items-center">
-              <HydrationBoundary state={dehydrate(queryClient)}>
-                <BookingCard />
-              </HydrationBoundary>
+              {user ? (
+                <div>{user && <BookingCard user={user} />}</div>
+              ) : (
+                <PinEntryForm onLogin={handleLogin} />
+              )}
             </CardContent>
           </Card>
         </div>

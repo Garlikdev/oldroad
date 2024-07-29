@@ -10,6 +10,7 @@ import {
   getServices,
   getUsers,
   getUserServicePrice,
+  getUserServices,
 } from "@/lib/actions/service.action";
 import {
   Select,
@@ -39,18 +40,23 @@ const schema = z.object({
 
 type BookingFormValues = z.infer<typeof schema>;
 
-const BookingCard: React.FC = () => {
+interface PinEntryFormProps {
+  user: User;
+}
+
+type User = {
+  name: string;
+  id: number;
+  pin: number;
+};
+
+const BookingCard = ({ user }: PinEntryFormProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: users, isLoading: isLoadingUsers } = useQuery({
-    queryKey: ["users"],
-    queryFn: async () => await getUsers(),
-  });
-
   const { data: services, isLoading: isLoadingServices } = useQuery({
     queryKey: ["services"],
-    queryFn: async () => await getServices(),
+    queryFn: async () => await getUserServices(user.id),
   });
 
   const form = useForm<z.infer<typeof schema>>({
@@ -62,16 +68,13 @@ const BookingCard: React.FC = () => {
     },
   });
 
-  const [userId, setUserId] = useState<number | null>(null);
   const [serviceId, setServiceId] = useState<number | null>(null);
 
   const { refetch: refetchPrice, isLoading: isLoadingPrice } = useQuery({
-    queryKey: ["user-service-price", userId, serviceId],
+    queryKey: ["user-service-price", user.id, serviceId],
     queryFn: async () => {
-      if (userId !== null && serviceId !== null) {
-        console.log("Fetching price for:", { userId, serviceId });
-        const price = await getUserServicePrice(userId, serviceId);
-        console.log("Fetched price:", price);
+      if (user.id !== null && serviceId !== null) {
+        const price = await getUserServicePrice(user.id, serviceId);
         form.setValue("price", price ?? 0);
         return price;
       }
@@ -90,7 +93,7 @@ const BookingCard: React.FC = () => {
       toast({
         title: "Sukces",
         description: `Wykonanie usługi dodane!`,
-        duration: 4000,
+        duration: 1000,
       });
       await queryClient.invalidateQueries({ queryKey: ["servers"] });
     },
@@ -108,23 +111,15 @@ const BookingCard: React.FC = () => {
     createBookingMutation.mutate(data);
   }
 
-  const handleUserChange = (value: string) => {
-    const newUserId = parseInt(value);
-    form.setValue("userId", newUserId);
-    setUserId(newUserId);
-    console.log("User ID changed to:", value); // Debug log
-  };
-
   const handleServiceChange = (value: string) => {
     form.setValue("serviceId", parseInt(value));
     setServiceId(parseInt(value));
-    console.log("Service ID changed to:", value);
   };
 
   useEffect(() => {
     async function fetchPrice() {
       try {
-        if (userId !== null && serviceId !== null) {
+        if (user.id !== null && serviceId !== null) {
           await refetchPrice();
         }
       } catch (e) {
@@ -132,39 +127,26 @@ const BookingCard: React.FC = () => {
       }
     }
     fetchPrice().catch(console.error);
-  }, [userId, serviceId, refetchPrice]);
+  }, [user, serviceId, refetchPrice]);
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="w-full space-y-6 md:w-2/3"
-      >
+      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-6">
         <FormField
           name="userId"
           control={form.control}
           render={({ field }) => (
             <FormItem>
               <FormLabel>Frygacz</FormLabel>
-              <Select
-                name={field.name}
-                onValueChange={handleUserChange}
-                value={userId?.toString() ?? ""}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Wybierz frygacza" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {users?.map((user) => (
-                    <SelectItem key={user.id} value={user.id.toString()}>
-                      {user.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormDescription>Którym frygaczem jesteś?</FormDescription>
+              <FormControl>
+                <Input
+                  placeholder="Frygacz"
+                  {...field}
+                  value={user.name}
+                  disabled
+                />
+              </FormControl>
+              <FormDescription>Zalogowany użytkownik</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -219,11 +201,11 @@ const BookingCard: React.FC = () => {
         />
         <Button
           type="submit"
+          className="mx-auto w-full"
           disabled={
             createBookingMutation.isPending ||
             isLoadingPrice ||
-            isLoadingServices ||
-            isLoadingUsers
+            isLoadingServices
           }
         >
           {createBookingMutation.isPending ? "Dodawanie..." : "Dodaj"}
