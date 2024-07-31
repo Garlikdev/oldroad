@@ -79,7 +79,7 @@ export default function UserData({ user }: { user: User }) {
           />
         </PopoverContent>
       </Popover>
-      {bookings ? (
+      {bookings?.length ? (
         <div className="flex flex-col">
           {bookings?.map((booking) => (
             <div
