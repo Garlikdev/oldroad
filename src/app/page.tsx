@@ -69,7 +69,7 @@ export default function HomePage() {
           {user && (
             <Card className="relative z-10 w-full bg-background/80 sm:w-fit">
               <CardHeader className="text-center">
-                <CardTitle>Dane</CardTitle>
+                <CardTitle>Historia usług</CardTitle>
               </CardHeader>
               <CardContent className="flex flex-col items-center">
                 {user && (
