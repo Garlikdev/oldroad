@@ -1,6 +1,7 @@
 "use server";
 
 import prisma from "@/lib/db";
+import moment from "moment";
 
 type UserServicePrice = {
   userId: number;
@@ -50,9 +51,20 @@ export async function getBookings() {
   return prisma.booking.findMany();
 }
 
-export async function getBookingsByUser(userId: number) {
+export async function getBookingsByUser(userId: number, date?: string) {
+  const filterDate = date
+    ? moment(date).startOf("day")
+    : moment().startOf("day");
+  const endDate = moment(filterDate).endOf("day");
+
   return prisma.booking.findMany({
-    where: { userId },
+    where: {
+      userId,
+      createdAt: {
+        gte: filterDate.toDate(),
+        lt: endDate.toDate(),
+      },
+    },
     orderBy: { createdAt: "desc" },
     include: {
       service: true,

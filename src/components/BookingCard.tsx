@@ -70,7 +70,11 @@ const BookingCard = ({ user }: PinEntryFormProps) => {
 
   const [serviceId, setServiceId] = useState<number | null>(null);
 
-  const { refetch: refetchPrice, isLoading: isLoadingPrice } = useQuery({
+  const {
+    data: price,
+    refetch: refetchPrice,
+    isLoading: isLoadingPrice,
+  } = useQuery({
     queryKey: ["user-service-price", user.id, serviceId],
     queryFn: async () => {
       if (user.id !== null && serviceId !== null) {
@@ -78,7 +82,7 @@ const BookingCard = ({ user }: PinEntryFormProps) => {
         form.setValue("price", price ?? 0);
         return price;
       }
-      return null;
+      return 0;
     },
     refetchOnWindowFocus: false,
     enabled: false,
@@ -123,6 +127,8 @@ const BookingCard = ({ user }: PinEntryFormProps) => {
         form.setValue("userId", user.id);
         if (user.id !== null && serviceId !== null) {
           await refetchPrice();
+        } else {
+          form.setValue("price", 0);
         }
       } catch (e) {
         console.error(e);
@@ -150,7 +156,7 @@ const BookingCard = ({ user }: PinEntryFormProps) => {
                 />
               </FormControl>
               <p>{user.name}</p>
-              <FormDescription>Zalogowany użytkownik</FormDescription>
+              {/* <FormDescription>Zalogowany użytkownik</FormDescription> */}
               <FormMessage />
             </FormItem>
           )}
@@ -172,14 +178,23 @@ const BookingCard = ({ user }: PinEntryFormProps) => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {services?.map((service) => (
-                    <SelectItem key={service.id} value={service.id.toString()}>
-                      {service.name}
-                    </SelectItem>
-                  ))}
+                  {services ? (
+                    <>
+                      {services?.map((service) => (
+                        <SelectItem
+                          key={service.id}
+                          value={service.id.toString()}
+                        >
+                          {service.name}
+                        </SelectItem>
+                      ))}
+                    </>
+                  ) : (
+                    <p>Brak danych</p>
+                  )}
                 </SelectContent>
               </Select>
-              <FormDescription>Którą usługę wykonujesz?</FormDescription>
+              {/* <FormDescription>Którą usługę wykonujesz?</FormDescription> */}
               <FormMessage />
             </FormItem>
           )}
@@ -196,9 +211,15 @@ const BookingCard = ({ user }: PinEntryFormProps) => {
                   {...field}
                   value={field.value}
                   onChange={(e) => field.onChange(parseInt(e.target.value))}
+                  disabled={
+                    createBookingMutation.isPending ||
+                    isLoadingPrice ||
+                    isLoadingServices ||
+                    !price
+                  }
                 />
               </FormControl>
-              <FormDescription>Dostosuj cenę</FormDescription>
+              <FormDescription>Możesz zmienić cenę</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -209,7 +230,8 @@ const BookingCard = ({ user }: PinEntryFormProps) => {
           disabled={
             createBookingMutation.isPending ||
             isLoadingPrice ||
-            isLoadingServices
+            isLoadingServices ||
+            !price
           }
         >
           {createBookingMutation.isPending ? "Dodawanie..." : "Dodaj"}

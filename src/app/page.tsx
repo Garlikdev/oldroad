@@ -43,7 +43,7 @@ export default function HomePage() {
       <div className="absolute left-[550px] top-[150px] z-[6] h-[250px] w-[350px] -rotate-[35deg] rounded-full bg-[#ffffff] opacity-30 blur-[60px]"></div>
       <div className="container flex gap-4 px-1 sm:px-2">
         <div className="z-10 flex w-full flex-col items-center gap-4">
-          <Card className="relative z-10 w-full bg-background/80 sm:w-[32rem]">
+          <Card className="relative z-10 w-full bg-background/80 sm:w-fit">
             <CardHeader className="text-center">
               <CardTitle>
                 {user && (
@@ -58,9 +58,7 @@ export default function HomePage() {
             </CardHeader>
             <CardContent className="flex flex-col items-center">
               {user ? (
-                <div className="flex flex-col items-center">
-                  {user && <BookingCard user={user} />}
-                </div>
+                <BookingCard user={user} />
               ) : (
                 <PinEntryForm onLogin={handleLogin} />
               )}
@@ -72,11 +70,7 @@ export default function HomePage() {
                 <CardTitle>Historia usług</CardTitle>
               </CardHeader>
               <CardContent className="flex flex-col items-center">
-                {user && (
-                  <div className="flex flex-col items-center">
-                    {user && <UserData user={user} />}
-                  </div>
-                )}
+                {user && <UserData user={user} />}
               </CardContent>
             </Card>
           )}
