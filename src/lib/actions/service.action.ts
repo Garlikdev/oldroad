@@ -50,6 +50,17 @@ export async function getBookings() {
   return prisma.booking.findMany();
 }
 
+export async function getBookingsByUser(userId: number) {
+  return prisma.booking.findMany({
+    where: { userId },
+    orderBy: { createdAt: "desc" },
+    include: {
+      service: true,
+      user: true,
+    },
+  });
+}
+
 export async function createBooking(data: {
   userId: number;
   serviceId: number;

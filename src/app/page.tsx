@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import BookingCard from "@/components/BookingCard";
 import { PinEntryForm } from "@/components/PinEntryForm";
 import { Button } from "@/components/ui/button";
+import UserData from "@/components/UserData";
 
 type User = {
   name: string;
@@ -40,9 +41,9 @@ export default function HomePage() {
       <div className="absolute bottom-[80px] right-[100px] z-[4] h-[450px] w-[450px] rounded-full bg-[#B3588A] opacity-80 blur-[60px]"></div>
       <div className="absolute left-[100px] top-[220px] z-[5] h-[350px] w-[550px] -rotate-[15deg] rounded-full bg-[#ffffff] opacity-30 blur-[60px]"></div>
       <div className="absolute left-[550px] top-[150px] z-[6] h-[250px] w-[350px] -rotate-[35deg] rounded-full bg-[#ffffff] opacity-30 blur-[60px]"></div>
-      <div className="container flex gap-4">
-        <div className="z-10 flex w-full flex-col gap-4">
-          <Card className="relative z-10 w-full bg-background/80">
+      <div className="container flex gap-4 px-1 sm:px-2">
+        <div className="z-10 flex w-full flex-col items-center gap-4">
+          <Card className="relative z-10 w-full bg-background/80 sm:w-[32rem]">
             <CardHeader className="text-center">
               <CardTitle>
                 {user && (
@@ -57,12 +58,28 @@ export default function HomePage() {
             </CardHeader>
             <CardContent className="flex flex-col items-center">
               {user ? (
-                <div>{user && <BookingCard user={user} />}</div>
+                <div className="flex flex-col items-center">
+                  {user && <BookingCard user={user} />}
+                </div>
               ) : (
                 <PinEntryForm onLogin={handleLogin} />
               )}
             </CardContent>
           </Card>
+          {user && (
+            <Card className="relative z-10 w-full bg-background/80 sm:w-fit">
+              <CardHeader className="text-center">
+                <CardTitle>Dane</CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col items-center">
+                {user && (
+                  <div className="flex flex-col items-center">
+                    {user && <UserData user={user} />}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </main>
