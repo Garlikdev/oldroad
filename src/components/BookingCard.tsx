@@ -62,8 +62,8 @@ const BookingCard = ({ user }: PinEntryFormProps) => {
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: {
-      userId: 0,
-      serviceId: 0,
+      userId: user?.id,
+      serviceId: undefined,
       price: 0,
     },
   });
@@ -101,6 +101,7 @@ const BookingCard = ({ user }: PinEntryFormProps) => {
       });
       await queryClient.invalidateQueries({ queryKey: ["bookings"] });
       await queryClient.invalidateQueries({ queryKey: ["bookings-by-user"] });
+      form.setValue("serviceId", -1);
     },
     onError: () => {
       toast({
@@ -167,7 +168,11 @@ const BookingCard = ({ user }: PinEntryFormProps) => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Usługa</FormLabel>
-              <Select name={field.name} onValueChange={handleServiceChange}>
+              <Select
+                value={field.value ? field.value.toString() : ""}
+                name={field.name}
+                onValueChange={handleServiceChange}
+              >
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue
