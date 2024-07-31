@@ -1,20 +1,6 @@
-"use client";
-
-import { useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import moment from "moment";
 import { getBookingsByUser } from "@/lib/actions/service.action";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Button } from "./ui/button";
-import { cn } from "@/lib/utils";
-import { CalendarIcon } from "@radix-ui/react-icons";
-import { Calendar } from "./ui/calendar";
-import { format } from "date-fns";
-import { pl } from "date-fns/locale";
 
 export const runtime = "edge";
 export const preferredRegion = ["arn1", "fra1"];
@@ -25,12 +11,18 @@ type User = {
   pin: number;
 };
 
-export default function UserData({ user }: { user: User }) {
-  const [date, setDate] = useState<Date | undefined>(new Date());
-
-  const queryClient = useQueryClient();
-
-  const { data: bookings, isLoading: isLoadingBookings } = useQuery({
+export default function UserData({
+  user,
+  date,
+}: {
+  user: User;
+  date: Date | undefined;
+}) {
+  const {
+    data: bookings,
+    isLoading: isLoadingBookings,
+    isError,
+  } = useQuery({
     queryKey: [
       "bookings-by-user",
       user.id,
@@ -43,53 +35,28 @@ export default function UserData({ user }: { user: User }) {
     enabled: !!date,
   });
 
-  if (isLoadingBookings) {
-    return <div>Ładowanie...</div>;
-  }
+  if (isLoadingBookings) return <div>Ładowanie...</div>;
+  if (isError) return <div>Błąd ładowania danych</div>;
 
-  const handleDateChange = async (date: Date | undefined) => {
-    setDate(date);
-    if (date) {
-      await queryClient.invalidateQueries({ queryKey: ["bookings-by-user"] });
-    }
-  };
+  const totalPrice = bookings?.reduce(
+    (sum: number, booking: { price: number }) => sum + booking.price,
+    0,
+  );
 
   return (
-    <div className="flex flex-col items-center gap-4">
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            variant={"outline"}
-            className={cn(
-              "w-[240px] justify-start text-left font-normal",
-              !date && "text-muted-foreground",
-            )}
-          >
-            <CalendarIcon className="mr-2 h-4 w-4" />
-            {date ? (
-              format(date, "PPP", { locale: pl })
-            ) : (
-              <span>Wybierz dzień</span>
-            )}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <Calendar
-            mode="single"
-            selected={date}
-            onSelect={handleDateChange}
-            initialFocus
-          />
-        </PopoverContent>
-      </Popover>
+    <div className="flex flex-col items-center gap-4 py-4">
+      <div className="flex w-full items-center justify-center">
+        <p>Suma: {totalPrice}zł</p>
+      </div>
+
       {bookings?.length ? (
         <div className="flex flex-col">
           {bookings?.map((booking) => (
             <div
               key={booking.id}
-              className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4"
+              className="grid grid-cols-3 gap-2 border-b py-1 last:border-none sm:gap-3 md:gap-4"
             >
-              <div>{moment(booking.createdAt).format("DD-MM-YYYY HH:mm")}</div>
+              <div>{moment(booking.createdAt).format("DD-MM-YY HH:mm")}</div>
               <div>{booking.service?.name}</div>
               <div className="flex justify-end">{booking.price}zł</div>
             </div>

@@ -60,7 +60,7 @@ export async function getBookingsByUser(userId: number, date?: string) {
 
   const endDate = moment(filterDate).endOf("day");
 
-  return prisma.booking.findMany({
+  const bookings = await prisma.booking.findMany({
     where: {
       userId,
       createdAt: {
@@ -74,6 +74,8 @@ export async function getBookingsByUser(userId: number, date?: string) {
       user: true,
     },
   });
+
+  return bookings;
 }
 
 export async function createBooking(data: {

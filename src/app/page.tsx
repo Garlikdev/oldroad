@@ -1,11 +1,22 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { format } from "date-fns";
+import { pl } from "date-fns/locale";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import BookingCard from "@/components/BookingCard";
 import { PinEntryForm } from "@/components/PinEntryForm";
 import { Button } from "@/components/ui/button";
 import UserData from "@/components/UserData";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { CalendarIcon } from "@radix-ui/react-icons";
+import { useQueryClient } from "@tanstack/react-query";
+import { Calendar } from "@/components/ui/calendar";
 
 type User = {
   name: string;
@@ -15,10 +26,20 @@ type User = {
 
 export default function HomePage() {
   const [user, setUser] = useState<User | null>(null);
+  const [date, setDate] = useState<Date | undefined>(new Date());
+
+  const queryClient = useQueryClient();
 
   const handleLogin = (userInfo: User) => {
     setUser(userInfo);
     localStorage.setItem("loggedInUser", JSON.stringify(userInfo));
+  };
+
+  const handleDateChange = async (date: Date | undefined) => {
+    setDate(date);
+    if (date) {
+      await queryClient.invalidateQueries({ queryKey: ["bookings-by-user"] });
+    }
   };
 
   useEffect(() => {
@@ -34,13 +55,7 @@ export default function HomePage() {
   };
 
   return (
-    <main className="relative flex min-h-screen w-full flex-col items-center gap-4 overflow-hidden bg-background py-4">
-      <div className="absolute left-[-50px] top-[-50px] z-[2] h-[200px] w-[900px] rotate-[-5deg] rounded-full bg-[#373372] opacity-40 blur-[60px]"></div>
-      <div className="absolute left-[-50px] top-[-50px] z-[1] h-[400px] w-[1200px] rotate-[-5deg] rounded-full bg-[#680963] opacity-60 blur-[60px]"></div>
-      <div className="absolute bottom-[100px] left-[80px] z-[3] h-[500px] w-[800px] rounded-full bg-[#7C336C] opacity-80 blur-[60px]"></div>
-      <div className="absolute bottom-[80px] right-[100px] z-[4] h-[450px] w-[450px] rounded-full bg-[#B3588A] opacity-80 blur-[60px]"></div>
-      <div className="absolute left-[100px] top-[220px] z-[5] h-[350px] w-[550px] -rotate-[15deg] rounded-full bg-[#ffffff] opacity-30 blur-[60px]"></div>
-      <div className="absolute left-[550px] top-[150px] z-[6] h-[250px] w-[350px] -rotate-[35deg] rounded-full bg-[#ffffff] opacity-30 blur-[60px]"></div>
+    <main className="relative flex min-h-screen w-full flex-col items-center gap-4 overflow-hidden py-4">
       <div className="container flex gap-4 px-1 sm:px-2">
         <div className="z-10 flex w-full flex-col items-center gap-4">
           <Card className="relative z-10 w-full bg-background/80 sm:w-fit">
@@ -70,7 +85,37 @@ export default function HomePage() {
                 <CardTitle>Historia usług</CardTitle>
               </CardHeader>
               <CardContent className="flex flex-col items-center">
-                {user && <UserData user={user} />}
+                {user && (
+                  <div className="flex flex-col items-center">
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-[240px] justify-start text-left font-normal",
+                            !date && "text-muted-foreground",
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {date ? (
+                            format(date, "PPP", { locale: pl })
+                          ) : (
+                            <span>Wybierz dzień</span>
+                          )}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={date}
+                          onSelect={handleDateChange}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <UserData user={user} date={date} />
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}
