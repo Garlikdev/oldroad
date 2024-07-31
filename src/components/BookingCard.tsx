@@ -96,6 +96,7 @@ const BookingCard = ({ user }: PinEntryFormProps) => {
         duration: 1000,
       });
       await queryClient.invalidateQueries({ queryKey: ["bookings"] });
+      await queryClient.invalidateQueries({ queryKey: ["bookings-by-user"] });
     },
     onError: () => {
       toast({
