@@ -1,7 +1,7 @@
 "use server";
 
 import prisma from "@/lib/db";
-import moment from "moment";
+import moment from "moment-timezone";
 
 type UserServicePrice = {
   userId: number;
@@ -52,9 +52,12 @@ export async function getBookings() {
 }
 
 export async function getBookingsByUser(userId: number, date?: string) {
+  const timezone = "Europe/Warsaw"; // GMT+2
+
   const filterDate = date
-    ? moment(date).startOf("day")
-    : moment().startOf("day");
+    ? moment.tz(date, timezone).startOf("day")
+    : moment.tz(timezone).startOf("day");
+
   const endDate = moment(filterDate).endOf("day");
 
   return prisma.booking.findMany({

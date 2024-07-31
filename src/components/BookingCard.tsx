@@ -7,8 +7,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createBooking,
-  getServices,
-  getUsers,
   getUserServicePrice,
   getUserServices,
 } from "@/lib/actions/service.action";
@@ -31,6 +29,9 @@ import {
   FormLabel,
   FormMessage,
 } from "./ui/form";
+
+export const runtime = "edge";
+export const preferredRegion = ["arn1", "fra1"];
 
 const schema = z.object({
   userId: z.number().positive(),
@@ -68,7 +69,7 @@ const BookingCard = ({ user }: PinEntryFormProps) => {
     },
   });
 
-  const [serviceId, setServiceId] = useState<number | null>(null);
+  const [serviceId, setServiceId] = useState<number | undefined>(undefined);
 
   const {
     data: price,
@@ -77,7 +78,7 @@ const BookingCard = ({ user }: PinEntryFormProps) => {
   } = useQuery({
     queryKey: ["user-service-price", user.id, serviceId],
     queryFn: async () => {
-      if (user.id !== null && serviceId !== null) {
+      if (user.id && serviceId) {
         const price = await getUserServicePrice(user.id, serviceId);
         form.setValue("price", price ?? 0);
         return price;
@@ -85,7 +86,7 @@ const BookingCard = ({ user }: PinEntryFormProps) => {
       return 0;
     },
     refetchOnWindowFocus: false,
-    enabled: false,
+    enabled: !!serviceId && !!user.id,
   });
 
   const createBookingMutation = useMutation({
@@ -125,18 +126,15 @@ const BookingCard = ({ user }: PinEntryFormProps) => {
   useEffect(() => {
     async function fetchPrice() {
       try {
-        form.setValue("userId", user.id);
-        if (user.id !== null && serviceId !== null) {
+        if (user.id && serviceId) {
           await refetchPrice();
-        } else {
-          form.setValue("price", 0);
         }
       } catch (e) {
         console.error(e);
       }
     }
     fetchPrice().catch(console.error);
-  }, [user, serviceId, refetchPrice, form]);
+  }, [user, serviceId, refetchPrice]);
 
   return (
     <Form {...form}>

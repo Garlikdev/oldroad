@@ -16,6 +16,9 @@ import { Calendar } from "./ui/calendar";
 import { format } from "date-fns";
 import { pl } from "date-fns/locale";
 
+export const runtime = "edge";
+export const preferredRegion = ["arn1", "fra1"];
+
 type User = {
   name: string;
   id: number;
