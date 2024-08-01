@@ -34,9 +34,9 @@ export const runtime = "edge";
 export const preferredRegion = ["arn1", "fra1"];
 
 const schema = z.object({
-  userId: z.number().positive(),
-  serviceId: z.number().positive(),
-  price: z.number().positive(),
+  userId: z.number().positive({ message: "User ID blablabla" }),
+  serviceId: z.number().positive({ message: "Service ID afsasfasf" }),
+  price: z.number().positive({ message: "Price agrgrarg" }),
 });
 
 type BookingFormValues = z.infer<typeof schema>;
@@ -70,6 +70,8 @@ const BookingCard = ({ user }: PinEntryFormProps) => {
   });
 
   const [serviceId, setServiceId] = useState<number | undefined>(undefined);
+
+  const priceField = form.watch("price"); // Watch the price field
 
   const {
     data: price,
@@ -212,8 +214,10 @@ const BookingCard = ({ user }: PinEntryFormProps) => {
                 <Input
                   placeholder="Cena"
                   {...field}
-                  value={field.value}
-                  onChange={(e) => field.onChange(parseInt(e.target.value))}
+                  value={field.value ?? ""}
+                  onChange={(e) =>
+                    field.onChange(parseInt(e.target.value) || "")
+                  }
                   disabled={
                     createBookingMutation.isPending ||
                     isLoadingPrice ||
@@ -223,7 +227,7 @@ const BookingCard = ({ user }: PinEntryFormProps) => {
                 />
               </FormControl>
               <FormDescription>Możesz zmienić cenę</FormDescription>
-              <FormMessage />
+              {/* <FormMessage /> */}
             </FormItem>
           )}
         />
@@ -234,7 +238,8 @@ const BookingCard = ({ user }: PinEntryFormProps) => {
             createBookingMutation.isPending ||
             isLoadingPrice ||
             isLoadingServices ||
-            !price
+            !price ||
+            !priceField
           }
         >
           {createBookingMutation.isPending ? "Dodawanie..." : "Dodaj"}

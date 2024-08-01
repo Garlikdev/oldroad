@@ -54,9 +54,12 @@ export default function UserData({
           {bookings?.map((booking) => (
             <div
               key={booking.id}
-              className="grid grid-cols-3 gap-2 border-b py-1 last:border-none sm:gap-3 md:gap-4"
+              className="grid grid-cols-3 items-center gap-2 border-b py-1 text-sm last:border-none sm:gap-3 md:gap-4"
             >
-              <div>{moment(booking.createdAt).format("DD-MM-YY HH:mm")}</div>
+              <div className="flex flex-col">
+                <p>{moment(booking.createdAt).format("DD-MM-YY")}</p>
+                <p>{moment(booking.createdAt).format("HH:mm")}</p>
+              </div>
               <div>{booking.service?.name}</div>
               <div className="flex justify-end">{booking.price}zł</div>
             </div>
