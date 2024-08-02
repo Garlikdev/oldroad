@@ -28,6 +28,7 @@ type User = {
 export default function HomePage() {
   const [user, setUser] = useState<User | null>(null);
   const [date, setDate] = useState<Date | undefined>(new Date());
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -37,6 +38,7 @@ export default function HomePage() {
   };
 
   const handleDateChange = async (date: Date | undefined) => {
+    setIsCalendarOpen(false);
     setDate(date);
     if (date) {
       await queryClient.invalidateQueries({ queryKey: ["bookings-by-user"] });
@@ -95,7 +97,10 @@ export default function HomePage() {
               <CardContent className="flex flex-col items-center">
                 {user && (
                   <div className="flex flex-col items-center">
-                    <Popover>
+                    <Popover
+                      open={isCalendarOpen}
+                      onOpenChange={setIsCalendarOpen}
+                    >
                       <PopoverTrigger asChild>
                         <Button
                           variant={"outline"}

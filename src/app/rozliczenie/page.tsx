@@ -26,10 +26,12 @@ type User = {
 export default function AllBookingsPage() {
   const [user, setUser] = useState<User | null>(null);
   const [date, setDate] = useState<Date | undefined>(new Date());
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   const queryClient = useQueryClient();
 
   const handleDateChange = async (date: Date | undefined) => {
+    setIsCalendarOpen(false);
     setDate(date);
     if (date) {
       await queryClient.invalidateQueries({ queryKey: ["bookings-by-user"] });
@@ -60,7 +62,10 @@ export default function AllBookingsPage() {
               <CardContent className="flex flex-col items-center">
                 {user && (
                   <div className="flex flex-col items-center">
-                    <Popover>
+                    <Popover
+                      open={isCalendarOpen}
+                      onOpenChange={setIsCalendarOpen}
+                    >
                       <PopoverTrigger asChild>
                         <Button
                           variant={"outline"}
