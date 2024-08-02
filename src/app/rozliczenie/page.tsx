@@ -4,10 +4,8 @@ import React, { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { pl } from "date-fns/locale";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import BookingCard from "@/components/BookingCard";
-import { PinEntryForm } from "@/components/PinEntryForm";
 import { Button } from "@/components/ui/button";
-import UserData from "@/components/UserData";
+import AllBookingsComponent from "./all-bookings";
 import {
   Popover,
   PopoverContent,
@@ -25,16 +23,11 @@ type User = {
   pin: number;
 };
 
-export default function HomePage() {
+export default function AllBookingsPage() {
   const [user, setUser] = useState<User | null>(null);
   const [date, setDate] = useState<Date | undefined>(new Date());
 
   const queryClient = useQueryClient();
-
-  const handleLogin = (userInfo: User) => {
-    setUser(userInfo);
-    localStorage.setItem("loggedInUser", JSON.stringify(userInfo));
-  };
 
   const handleDateChange = async (date: Date | undefined) => {
     setDate(date);
@@ -50,46 +43,18 @@ export default function HomePage() {
     }
   }, []);
 
-  const handleLogout = () => {
-    setUser(null);
-    localStorage.removeItem("loggedInUser");
-  };
-
   return (
     <main className="relative flex min-h-screen w-full flex-col items-center gap-4 overflow-hidden py-4">
       <div className="container flex gap-4 px-1 sm:px-2">
         <div className="z-10 flex w-full flex-col items-center gap-4">
-          <Card className="relative z-10 w-full bg-background/80 sm:w-fit">
-            <CardHeader className="text-center">
-              <CardTitle>
-                {user && (
-                  <div className="flex items-center justify-center gap-4">
-                    <h1>{user.name}</h1>
-                    <Button className="px-2" onClick={handleLogout}>
-                      Wyloguj
-                    </Button>
-                  </div>
-                )}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col items-center">
-              {user ? (
-                <BookingCard user={user} />
-              ) : (
-                <PinEntryForm onLogin={handleLogin} />
-              )}
-            </CardContent>
-          </Card>
-          {user && (
+          {user?.id === 3 ? (
             <Card className="relative z-10 w-full bg-background/80 sm:w-fit">
               <CardHeader className="text-center">
                 <CardTitle className="mx-auto flex items-center gap-4">
-                  <p>Historia usług</p>
-                  {user?.id === 3 && (
-                    <Link href="/rozliczenie">
-                      <Button className="px-2">Wszystkie</Button>
-                    </Link>
-                  )}
+                  <Link href="/">
+                    <Button className="px-2">Powrót</Button>
+                  </Link>
+                  <p>Historia</p>
                 </CardTitle>
               </CardHeader>
               <CardContent className="flex flex-col items-center">
@@ -121,11 +86,13 @@ export default function HomePage() {
                         />
                       </PopoverContent>
                     </Popover>
-                    <UserData user={user} date={date} />
+                    <AllBookingsComponent date={date} />
                   </div>
                 )}
               </CardContent>
             </Card>
+          ) : (
+            <p>Brak uprawnień</p>
           )}
         </div>
       </div>

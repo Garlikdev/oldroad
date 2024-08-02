@@ -47,8 +47,30 @@ export async function getUser(pin: number) {
 
 // Usługi
 
-export async function getBookings() {
-  return prisma.booking.findMany();
+export async function getAllBookings(date?: string) {
+  const timezone = "Europe/Warsaw"; // GMT+2
+
+  const filterDate = date
+    ? moment.tz(date, timezone).startOf("day")
+    : moment.tz(timezone).startOf("day");
+
+  const endDate = moment(filterDate).endOf("day");
+
+  const bookings = await prisma.booking.findMany({
+    where: {
+      createdAt: {
+        gte: filterDate.toDate(),
+        lt: endDate.toDate(),
+      },
+    },
+    orderBy: { createdAt: "desc" },
+    include: {
+      service: true,
+      user: true,
+    },
+  });
+
+  return bookings;
 }
 
 export async function getBookingsByUser(userId: number, date?: string) {
