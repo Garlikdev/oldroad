@@ -29,6 +29,7 @@ export default function HomePage() {
   const [user, setUser] = useState<User | null>(null);
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [isLoadingUserData, setIsLoadingUserData] = useState(true);
 
   const queryClient = useQueryClient();
 
@@ -46,10 +47,12 @@ export default function HomePage() {
   };
 
   useEffect(() => {
+    setIsLoadingUserData(true);
     const savedUser = localStorage.getItem("loggedInUser");
     if (savedUser) {
       setUser(JSON.parse(savedUser) as User);
     }
+    setIsLoadingUserData(false);
   }, []);
 
   const handleLogout = () => {
@@ -75,7 +78,9 @@ export default function HomePage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col items-center">
-              {user ? (
+              {isLoadingUserData ? (
+                <div>Ładowanie...</div>
+              ) : user ? (
                 <BookingCard user={user} />
               ) : (
                 <PinEntryForm onLogin={handleLogin} />

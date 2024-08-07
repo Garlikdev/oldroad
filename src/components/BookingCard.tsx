@@ -34,9 +34,9 @@ export const runtime = "edge";
 export const preferredRegion = ["arn1", "fra1"];
 
 const schema = z.object({
-  userId: z.number().positive({ message: "User ID blablabla" }),
-  serviceId: z.number().positive({ message: "Service ID afsasfasf" }),
-  price: z.number().positive({ message: "Price agrgrarg" }),
+  userId: z.number().positive({ message: "User ID" }),
+  serviceId: z.number().positive({ message: "Service ID" }),
+  price: z.number().positive({ message: "Price" }),
 });
 
 type BookingFormValues = z.infer<typeof schema>;
@@ -56,8 +56,9 @@ const BookingCard = ({ user }: PinEntryFormProps) => {
   const queryClient = useQueryClient();
 
   const { data: services, isLoading: isLoadingServices } = useQuery({
-    queryKey: ["services"],
+    queryKey: ["services", user.id],
     queryFn: async () => await getUserServices(user.id),
+    enabled: !!user.id,
   });
 
   const form = useForm<z.infer<typeof schema>>({
