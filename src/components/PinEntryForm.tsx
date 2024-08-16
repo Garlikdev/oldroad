@@ -54,21 +54,31 @@ export const PinEntryForm: React.FC<PinEntryFormProps> = ({ onLogin }) => {
       const user = await getUser(pin);
       if (user) {
         onLogin(user);
+        return user;
+      } else {
+        toast({
+          title: "Błąd",
+          description: `Niepoprawny pin`,
+          duration: 1000,
+        });
       }
       return user;
     },
-    onSuccess: () => {
-      toast({
-        title: "Sukces",
-        description: `Zalogowano`,
-        duration: 1000,
-      });
+    onSuccess: (data) => {
+      if (data) {
+        toast({
+          title: "Sukces",
+          description: `Zalogowano`,
+          className: "bg-green-400 dark:bg-green-700",
+          duration: 1000,
+        });
+      }
     },
     onError: () => {
       toast({
         variant: "destructive",
-        title: "Problem",
-        description: `Wystąpił błąd`,
+        title: "Błąd",
+        description: `Nie udało się zalogować`,
         duration: 4000,
       });
     },
