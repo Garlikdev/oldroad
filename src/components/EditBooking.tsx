@@ -4,12 +4,10 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { format } from "date-fns";
-import { pl } from "date-fns/locale";
-import { cn } from "@/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  createBooking,
+  editBooking,
+  getBookingById,
   getUserServicePrice,
   getUserServices,
 } from "@/lib/actions/service.action";
@@ -32,6 +30,10 @@ import {
   FormLabel,
   FormMessage,
 } from "./ui/form";
+import { format } from "date-fns";
+import { pl } from "date-fns/locale";
+import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { Calendar } from "./ui/calendar";
@@ -48,70 +50,74 @@ const schema = z.object({
 
 type BookingFormValues = z.infer<typeof schema>;
 
-interface PinEntryFormProps {
-  user: User;
-}
-
-type User = {
-  name: string;
-  id: number;
-  pin: number;
-};
-
-const BookingCard = ({ user }: PinEntryFormProps) => {
+const EditBooking = ({ bookingId }: { bookingId: string }) => {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [serviceId, setServiceId] = useState<number | undefined>(undefined);
-
   const { toast } = useToast();
+  const router = useRouter();
+
   const queryClient = useQueryClient();
 
+  const { data: booking, isLoading: isLoadingBooking } = useQuery({
+    queryKey: ["getBookingById", bookingId],
+    queryFn: async () => {
+      if (bookingId) {
+        const booking = await getBookingById(parseInt(bookingId));
+        setServiceId(booking?.service.id ?? 0);
+        form.setValue("serviceId", booking?.service.id ?? 0);
+        form.setValue("createdAt", booking?.createdAt ?? new Date());
+        setDate(booking?.createdAt ?? new Date());
+        form.setValue("price", booking?.price ?? 0);
+        return booking;
+      }
+    },
+    enabled: !!bookingId,
+  });
+
   const { data: services, isLoading: isLoadingServices } = useQuery({
-    queryKey: ["services", user.id],
-    queryFn: async () => await getUserServices(user.id),
-    enabled: !!user.id,
+    queryKey: ["services", booking?.user.id],
+    queryFn: async () => await getUserServices(booking?.user.id ?? 0),
+    enabled: !!booking,
   });
 
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: {
-      userId: user?.id,
-      serviceId: undefined,
-      price: 0,
+      createdAt: booking?.createdAt ? new Date(booking.createdAt) : new Date(),
+      serviceId: booking?.service.id,
+      price: booking?.price,
     },
   });
 
   const priceField = form.watch("price"); // Watch the price field
 
-  const {
-    data: price,
-    refetch: refetchPrice,
-    isLoading: isLoadingPrice,
-  } = useQuery({
-    queryKey: ["user-service-price", user.id, serviceId],
+  const { refetch: refetchPrice, isLoading: isLoadingPrice } = useQuery({
+    queryKey: ["user-service-price", booking?.user.id, serviceId],
     queryFn: async () => {
-      if (user.id && serviceId) {
-        const price = await getUserServicePrice(user.id, serviceId);
+      if (booking && serviceId) {
+        const price = await getUserServicePrice(booking?.user.id, serviceId);
         form.setValue("price", price ?? 0);
         return price;
       }
       return 0;
     },
-    refetchOnWindowFocus: false,
-    enabled: !!serviceId && !!user.id,
+    enabled: false,
   });
 
-  const createBookingMutation = useMutation({
-    mutationKey: ["createBooking"],
+  const editBookingMutation = useMutation({
+    mutationKey: ["editBooking", bookingId],
     mutationFn: async (data: BookingFormValues) => {
-      await createBooking(data);
+      if (bookingId) {
+        return await editBooking(parseInt(bookingId), data);
+      }
     },
     onSuccess: async () => {
       toast({
         title: "Sukces",
-        description: `Wykonanie usługi dodane!`,
+        description: `Usługa edytowana!`,
         className: "bg-green-400 dark:bg-green-700",
-        duration: 4000,
+        duration: 1000,
       });
       await queryClient.invalidateQueries({
         queryKey: ["bookings"],
@@ -122,22 +128,23 @@ const BookingCard = ({ user }: PinEntryFormProps) => {
       await queryClient.invalidateQueries({
         queryKey: ["bookings-all"],
       });
-      form.setValue("serviceId", -1);
-      form.setValue("price", 0);
+      router.push("/");
     },
     onError: () => {
       toast({
         variant: "destructive",
         title: "Błąd",
-        description: "Nie udało się zapisać wykonanej usługi",
+        description: "Nie udało się zapisać zmian",
         duration: 4000,
       });
     },
   });
 
-  function onSubmit(data: z.infer<typeof schema>) {
-    createBookingMutation.mutate(data);
-  }
+  const handleServiceChange = async (value: string) => {
+    form.setValue("serviceId", parseInt(value));
+    setServiceId(parseInt(value));
+    await refetchPrice();
+  };
 
   const handleDateChange = (date: Date | undefined) => {
     setIsCalendarOpen(false);
@@ -145,15 +152,15 @@ const BookingCard = ({ user }: PinEntryFormProps) => {
     form.setValue("createdAt", date ?? new Date());
   };
 
-  const handleServiceChange = (value: string) => {
-    form.setValue("serviceId", parseInt(value));
-    setServiceId(parseInt(value));
-  };
+  function onSubmit(data: z.infer<typeof schema>) {
+    console.log("form data:", data);
+    editBookingMutation.mutate(data);
+  }
 
   useEffect(() => {
     async function fetchPrice() {
       try {
-        if (user.id && serviceId) {
+        if (booking?.user.id && serviceId) {
           await refetchPrice();
         }
       } catch (e) {
@@ -161,32 +168,15 @@ const BookingCard = ({ user }: PinEntryFormProps) => {
       }
     }
     fetchPrice().catch(console.error);
-  }, [user, serviceId, refetchPrice]);
+  }, [booking?.user, serviceId, refetchPrice]);
+
+  if (isLoadingBooking || isLoadingServices || !bookingId) {
+    return <div>Ładowanie...</div>;
+  }
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-6">
-        <FormField
-          name="userId"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Frygacz</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Frygacz"
-                  {...field}
-                  value={user.id}
-                  className="hidden"
-                  disabled
-                />
-              </FormControl>
-              <p>{user.name}</p>
-              {/* <FormDescription>Zalogowany użytkownik</FormDescription> */}
-              <FormMessage />
-            </FormItem>
-          )}
-        />
         <FormField
           name="createdAt"
           control={form.control}
@@ -282,7 +272,7 @@ const BookingCard = ({ user }: PinEntryFormProps) => {
           name="price"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Cena</FormLabel>
+              <FormLabel>Cena zapisana: {booking?.price}</FormLabel>
               <FormControl>
                 <Input
                   placeholder="Cena"
@@ -292,10 +282,9 @@ const BookingCard = ({ user }: PinEntryFormProps) => {
                     field.onChange(parseInt(e.target.value) || "")
                   }
                   disabled={
-                    createBookingMutation.isPending ||
+                    editBookingMutation.isPending ||
                     isLoadingPrice ||
-                    isLoadingServices ||
-                    !price
+                    isLoadingServices
                   }
                 />
               </FormControl>
@@ -308,18 +297,17 @@ const BookingCard = ({ user }: PinEntryFormProps) => {
           type="submit"
           className="mx-auto w-full"
           disabled={
-            createBookingMutation.isPending ||
+            editBookingMutation.isPending ||
             isLoadingPrice ||
             isLoadingServices ||
-            !price ||
             !priceField
           }
         >
-          {createBookingMutation.isPending ? "Dodawanie..." : "Dodaj"}
+          {editBookingMutation.isPending ? "Zapisywanie zmian..." : "Zapisz"}
         </Button>
       </form>
     </Form>
   );
 };
 
-export default BookingCard;
+export default EditBooking;

@@ -92,11 +92,9 @@ export default function HomePage() {
               <CardHeader className="text-center">
                 <CardTitle className="mx-auto flex items-center gap-4">
                   <p>Historia usług</p>
-                  {user?.id === 3 && (
-                    <Link href="/rozliczenie">
-                      <Button className="px-2">Wszystkie</Button>
-                    </Link>
-                  )}
+                  <Link href="/historia">
+                    <Button className="px-2">Edytuj</Button>
+                  </Link>
                 </CardTitle>
               </CardHeader>
               <CardContent className="flex flex-col items-center">

@@ -23,15 +23,10 @@ export default function UserData({
     isLoading: isLoadingBookings,
     isError,
   } = useQuery({
-    queryKey: [
-      "bookings-by-user",
-      user.id,
-      date ? moment(date).format("YYYY-MM-DD") : "",
-    ],
-    queryFn: async () =>
-      date
-        ? await getBookingsByUser(user.id, moment(date).format("YYYY-MM-DD"))
-        : Promise.resolve([]),
+    queryKey: ["bookings-by-user", user.id, date ? date : ""],
+    queryFn: async () => {
+      return await getBookingsByUser(user.id, date);
+    },
     enabled: !!date,
   });
 

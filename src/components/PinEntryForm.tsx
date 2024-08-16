@@ -23,6 +23,7 @@ import {
 import { toast } from "@/components/ui/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { getUser } from "@/lib/actions/service.action";
+import { useEffect } from "react";
 
 const FormSchema = z.object({
   pin: z.string().min(4, {
@@ -47,6 +48,8 @@ export const PinEntryForm: React.FC<PinEntryFormProps> = ({ onLogin }) => {
       pin: "",
     },
   });
+
+  const { setFocus } = form;
 
   const retrieveUser = useMutation({
     mutationKey: ["retrieveUser"],
@@ -88,6 +91,10 @@ export const PinEntryForm: React.FC<PinEntryFormProps> = ({ onLogin }) => {
     retrieveUser.mutate(parseInt(data.pin));
   }
 
+  useEffect(() => {
+    setFocus("pin");
+  }, [setFocus]);
+
   return (
     <Form {...form}>
       <form
@@ -110,7 +117,7 @@ export const PinEntryForm: React.FC<PinEntryFormProps> = ({ onLogin }) => {
                   </InputOTPGroup>
                 </InputOTP>
               </FormControl>
-              <FormDescription>Wprowadź pin by się zalogować.</FormDescription>
+              <FormDescription>Wprowadź pin.</FormDescription>
               <FormMessage />
             </FormItem>
           )}

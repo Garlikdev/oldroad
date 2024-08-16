@@ -9,6 +9,13 @@ type UserServicePrice = {
   price: number;
 };
 
+type EditBooking = {
+  userId: number;
+  serviceId: number;
+  price: number;
+  createdAt: Date;
+};
+
 export async function getServices() {
   return prisma.service.findMany();
 }
@@ -47,7 +54,7 @@ export async function getUser(pin: number) {
 
 // Usługi
 
-export async function getAllBookings(date?: string) {
+export async function getAllBookings(userId: number, date?: string) {
   const timezone = "Europe/Warsaw"; // GMT+2
 
   const filterDate = date
@@ -56,24 +63,61 @@ export async function getAllBookings(date?: string) {
 
   const endDate = moment(filterDate).endOf("day");
 
-  const bookings = await prisma.booking.findMany({
-    where: {
-      createdAt: {
-        gte: filterDate.toDate(),
-        lt: endDate.toDate(),
+  let bookings;
+  if (userId === 3) {
+    bookings = await prisma.booking.findMany({
+      where: {
+        createdAt: {
+          gte: filterDate.toDate(),
+          lt: endDate.toDate(),
+        },
       },
-    },
-    orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: "desc" },
+      include: {
+        service: true,
+        user: true,
+      },
+    });
+  } else {
+    bookings = await prisma.booking.findMany({
+      where: {
+        userId,
+        createdAt: {
+          gte: filterDate.toDate(),
+          lt: endDate.toDate(),
+        },
+      },
+      orderBy: { createdAt: "desc" },
+      include: {
+        service: true,
+        user: true,
+      },
+    });
+  }
+
+  return bookings;
+}
+
+export async function getBookingById(bookingId: number) {
+  const booking = await prisma.booking.findUnique({
+    where: { id: bookingId },
     include: {
       service: true,
       user: true,
     },
   });
-
-  return bookings;
+  return booking;
 }
 
-export async function getBookingsByUser(userId: number, date?: string) {
+export async function editBooking(bookingId: number, data: EditBooking) {
+  const booking = await prisma.booking.update({
+    where: { id: bookingId },
+    data,
+  });
+  return booking;
+}
+
+export async function getBookingsByUser(userId: number, date?: Date) {
   const timezone = "Europe/Warsaw"; // GMT+2
 
   const filterDate = date
@@ -103,14 +147,16 @@ export async function getBookingsByUser(userId: number, date?: string) {
 export async function createBooking(data: {
   userId: number;
   serviceId: number;
+  createdAt: Date;
   price: number;
 }) {
   try {
-    const { userId, serviceId, price } = data;
+    const { userId, serviceId, price, createdAt } = data;
 
     const newBooking = await prisma.booking.create({
       data: {
         userId,
+        createdAt,
         serviceId,
         price,
       },

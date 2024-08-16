@@ -3,13 +3,18 @@
 import { useQuery } from "@tanstack/react-query";
 import moment from "moment";
 import { getAllBookings } from "@/lib/actions/service.action";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Pencil2Icon } from "@radix-ui/react-icons";
 
 export const runtime = "edge";
 export const preferredRegion = ["arn1", "fra1"];
 
 export default function AllBookingsComponent({
+  userId,
   date,
 }: {
+  userId: number;
   date: Date | undefined;
 }) {
   const {
@@ -17,10 +22,14 @@ export default function AllBookingsComponent({
     isLoading: isLoadingBookings,
     isError,
   } = useQuery({
-    queryKey: ["bookings-all", date ? moment(date).format("YYYY-MM-DD") : ""],
+    queryKey: [
+      "bookings-all",
+      userId,
+      date ? moment(date).format("YYYY-MM-DD") : "",
+    ],
     queryFn: async () =>
       date
-        ? await getAllBookings(moment(date).format("YYYY-MM-DD"))
+        ? await getAllBookings(userId, moment(date).format("YYYY-MM-DD"))
         : Promise.resolve([]),
     enabled: !!date,
   });
@@ -44,7 +53,7 @@ export default function AllBookingsComponent({
           {bookings?.map((booking) => (
             <div
               key={booking.id}
-              className="grid grid-cols-4 items-center gap-2 border-b py-1 text-sm last:border-none sm:gap-3 md:gap-4"
+              className="grid grid-cols-5 items-center gap-2 border-b py-1 text-xs last:border-none sm:gap-3 sm:text-sm md:gap-4"
             >
               <div className="flex flex-col">
                 <p>{moment(booking.createdAt).format("DD-MM-YY")}</p>
@@ -53,6 +62,13 @@ export default function AllBookingsComponent({
               <div>{booking.user?.name}</div>
               <div>{booking.service?.name}</div>
               <div className="flex justify-end">{booking.price}zł</div>
+              <div className="flex justify-end">
+                <Link href={`/historia/${booking.id}`}>
+                  <Button className="px-2">
+                    <Pencil2Icon />
+                  </Button>
+                </Link>
+              </div>
             </div>
           ))}
         </div>
