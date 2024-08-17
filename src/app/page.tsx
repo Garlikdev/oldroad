@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { pl } from "date-fns/locale";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import BookingCard from "@/components/BookingCard";
+import BookingCard from "@/app/BookingCard";
 import { PinEntryForm } from "@/components/PinEntryForm";
 import { Button } from "@/components/ui/button";
 import UserData from "@/components/UserData";

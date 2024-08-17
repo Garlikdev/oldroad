@@ -10,7 +10,6 @@ type UserServicePrice = {
 };
 
 type EditBooking = {
-  userId: number;
   serviceId: number;
   price: number;
   createdAt: Date;

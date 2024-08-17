@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import EditBooking from "@/components/EditBooking";
+import EditBooking from "@/app/historia/[bookingId]/EditBooking";
 
 type User = {
   name: string;

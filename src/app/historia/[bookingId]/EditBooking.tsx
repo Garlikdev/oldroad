@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { format } from "date-fns";
+import { pl } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   editBooking,
@@ -17,9 +20,9 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./ui/select";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import {
   Form,
@@ -29,20 +32,20 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "./ui/form";
-import { format } from "date-fns";
-import { pl } from "date-fns/locale";
-import { cn } from "@/lib/utils";
+} from "@/components/ui/form";
 import { useRouter } from "next/navigation";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { CalendarIcon } from "@radix-ui/react-icons";
-import { Calendar } from "./ui/calendar";
+import { Calendar } from "@/components/ui/calendar";
 
 export const runtime = "edge";
 export const preferredRegion = ["arn1", "fra1"];
 
 const schema = z.object({
-  userId: z.number().positive({ message: "User ID" }),
   createdAt: z.date(),
   serviceId: z.number().positive({ message: "Service ID" }),
   price: z.number().positive({ message: "Price" }),
@@ -109,7 +112,7 @@ const EditBooking = ({ bookingId }: { bookingId: string }) => {
     mutationKey: ["editBooking", bookingId],
     mutationFn: async (data: BookingFormValues) => {
       if (bookingId) {
-        return await editBooking(parseInt(bookingId), data);
+        return await editBooking(Number(bookingId), data);
       }
     },
     onSuccess: async () => {
@@ -127,6 +130,9 @@ const EditBooking = ({ bookingId }: { bookingId: string }) => {
       });
       await queryClient.invalidateQueries({
         queryKey: ["bookings-all"],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ["getBookingById"],
       });
       router.push("/");
     },
@@ -169,6 +175,10 @@ const EditBooking = ({ bookingId }: { bookingId: string }) => {
     }
     fetchPrice().catch(console.error);
   }, [booking?.user, serviceId, refetchPrice]);
+
+  if (booking === null) {
+    return <div>Brak usługi o podanym</div>;
+  }
 
   if (isLoadingBooking || isLoadingServices || !bookingId) {
     return <div>Ładowanie...</div>;
@@ -289,7 +299,7 @@ const EditBooking = ({ bookingId }: { bookingId: string }) => {
                 />
               </FormControl>
               <FormDescription>Możesz zmienić cenę</FormDescription>
-              {/* <FormMessage /> */}
+              <FormMessage />
             </FormItem>
           )}
         />

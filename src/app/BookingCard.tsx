@@ -19,9 +19,9 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./ui/select";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import {
   Form,
@@ -31,10 +31,14 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "./ui/form";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+} from "@/components/ui/form";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { CalendarIcon } from "@radix-ui/react-icons";
-import { Calendar } from "./ui/calendar";
+import { Calendar } from "@/components/ui/calendar";
 
 export const runtime = "edge";
 export const preferredRegion = ["arn1", "fra1"];
@@ -162,6 +166,10 @@ const BookingCard = ({ user }: PinEntryFormProps) => {
     }
     fetchPrice().catch(console.error);
   }, [user, serviceId, refetchPrice]);
+
+  useEffect(() => {
+    form.setValue("createdAt", date ?? new Date());
+  }, [date, form]);
 
   return (
     <Form {...form}>
