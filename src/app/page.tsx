@@ -99,7 +99,7 @@ export default function HomePage() {
               </CardHeader>
               <CardContent className="flex flex-col items-center">
                 {user && (
-                  <div className="flex flex-col items-center">
+                  <div className="flex w-full flex-col items-center">
                     <Popover
                       open={isCalendarOpen}
                       onOpenChange={setIsCalendarOpen}
@@ -125,7 +125,6 @@ export default function HomePage() {
                           mode="single"
                           selected={date}
                           onSelect={handleDateChange}
-                          initialFocus
                         />
                       </PopoverContent>
                     </Popover>
