@@ -225,7 +225,6 @@ const EditBooking = ({ bookingId }: { bookingId: string }) => {
                         mode="single"
                         selected={date}
                         onSelect={handleDateChange}
-                        initialFocus
                       />
                     </PopoverContent>
                   </Popover>

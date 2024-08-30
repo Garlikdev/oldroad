@@ -88,7 +88,6 @@ export default function AllBookingsPage() {
                         mode="single"
                         selected={date}
                         onSelect={handleDateChange}
-                        initialFocus
                       />
                     </PopoverContent>
                   </Popover>
