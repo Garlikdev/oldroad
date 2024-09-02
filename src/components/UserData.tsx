@@ -40,12 +40,11 @@ export default function UserData({
 
   return (
     <div className="flex w-full flex-col items-center gap-4 py-4">
-      <div className="flex w-full items-center justify-center">
-        <p>Suma: {totalPrice}zł</p>
-      </div>
-
       {bookings?.length ? (
         <div className="flex w-full flex-col">
+          <div className="flex w-full items-center justify-center">
+            <p>Suma: {totalPrice}zł</p>
+          </div>
           {bookings?.map((booking) => (
             <div
               key={booking.id}

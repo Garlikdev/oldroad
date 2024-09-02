@@ -31,7 +31,7 @@ export default async function RootLayout({
   return (
     <html
       className={`${GeistSans.variable}`}
-      lang="en"
+      lang="pl"
       suppressHydrationWarning
     >
       <body className="relative min-h-screen bg-background bg-neutral-200 bg-opacity-50 font-sans text-neutral-950 antialiased dark:bg-neutral-900 dark:text-neutral-50 dark:text-opacity-90">

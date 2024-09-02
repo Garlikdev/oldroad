@@ -7,9 +7,6 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Pencil2Icon } from "@radix-ui/react-icons";
 
-export const runtime = "edge";
-export const preferredRegion = ["arn1", "fra1"];
-
 export default function AllBookingsComponent({
   userId,
   date,
@@ -44,12 +41,11 @@ export default function AllBookingsComponent({
 
   return (
     <div className="flex flex-col items-center gap-4 py-4">
-      <div className="flex w-full items-center justify-center">
-        <p>Suma: {totalPrice}zł</p>
-      </div>
-
       {bookings?.length ? (
         <div className="flex flex-col">
+          <div className="flex w-full items-center justify-center">
+            <p>Suma: {totalPrice}zł</p>
+          </div>
           {bookings?.map((booking) => (
             <div
               key={booking.id}
@@ -63,7 +59,7 @@ export default function AllBookingsComponent({
               <div>{booking.service?.name}</div>
               <div className="flex justify-end">{booking.price}zł</div>
               <div className="flex justify-end">
-                <Link href={`/historia/${booking.id}`}>
+                <Link href={`/historia/usluga/${booking.id}`}>
                   <Button className="px-2">
                     <Pencil2Icon />
                   </Button>

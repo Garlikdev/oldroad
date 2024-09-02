@@ -38,15 +38,16 @@ export async function getUsers() {
   return prisma.user.findMany();
 }
 
-export type User = {
-  id: number;
-  name: string;
-  pin: number;
-};
-
 export async function getUser(pin: number) {
-  const userData: User | null = await prisma.user.findUnique({
+  const userData = await prisma.user.findUnique({
     where: { pin },
+    select: {
+      id: true,
+      name: true,
+      role: true,
+      // Add other fields you want to include in the returned user data
+      pin: false, // This excludes the pin field
+    },
   });
   return userData ? userData : null;
 }
@@ -143,6 +144,55 @@ export async function getBookingsByUser(userId: number, date?: Date) {
   return bookings;
 }
 
+export async function getMonthlyEarningsByUser(year: number, month: number) {
+  const timezone = "Europe/Warsaw"; // GMT+2
+
+  const startDate = moment
+    .tz({ year, month: month - 1 }, timezone)
+    .startOf("month")
+    .toDate();
+  const endDate = moment(startDate).endOf("month").toDate();
+
+  // First, group by userId and aggregate data
+  const result = await prisma.booking.groupBy({
+    by: ["userId"],
+    where: {
+      createdAt: {
+        gte: startDate,
+        lt: endDate,
+      },
+    },
+    _sum: {
+      price: true,
+    },
+    _count: {
+      id: true,
+    },
+  });
+
+  // Now, fetch user details separately
+  const userIds = result.map((entry) => entry.userId);
+  const users = await prisma.user.findMany({
+    where: {
+      id: {
+        in: userIds,
+      },
+    },
+  });
+
+  // Combine the user data with the aggregation results
+  const userMonthlyEarnings = result.map((entry) => {
+    const user = users.find((u) => u.id === entry.userId);
+    return {
+      userName: user?.name ?? "Unknown",
+      totalBookings: entry._count.id,
+      totalPrice: entry._sum.price,
+    };
+  });
+
+  return userMonthlyEarnings;
+}
+
 export async function createBooking(data: {
   userId: number;
   serviceId: number;
@@ -167,6 +217,7 @@ export async function createBooking(data: {
     return null;
   }
 }
+
 export async function getUserServicePrice(userId: number, serviceId: number) {
   try {
     const userServicePrice: UserServicePrice | null =
@@ -184,4 +235,44 @@ export async function getUserServicePrice(userId: number, serviceId: number) {
     console.error("Brak ustalonej ceny usługi");
     return null;
   }
+}
+
+// startowy hajs
+export async function createStart(data: { createdAt: Date; price: number }) {
+  try {
+    const { price, createdAt } = data;
+
+    const newStart = await prisma.start.create({
+      data: {
+        price,
+        createdAt,
+      },
+    });
+
+    return newStart;
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
+}
+
+export async function getAllStarts(date?: string) {
+  const timezone = "Europe/Warsaw"; // GMT+2
+
+  const filterDate = date
+    ? moment.tz(date, timezone).startOf("day")
+    : moment.tz(timezone).startOf("day");
+
+  const endDate = moment(filterDate).endOf("day");
+
+  const starts = await prisma.start.findMany({
+    where: {
+      createdAt: {
+        gte: filterDate.toDate(),
+        lt: endDate.toDate(),
+      },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+  return starts;
 }
