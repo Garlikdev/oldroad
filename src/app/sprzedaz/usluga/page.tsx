@@ -175,13 +175,7 @@ export default function AddService() {
         <div className="z-10 flex w-full flex-col items-center gap-4">
           <Card className="relative z-10 w-full bg-background/80 sm:w-fit">
             <CardHeader className="text-center">
-              <CardTitle>
-                {user && (
-                  <div className="flex items-center justify-center gap-4">
-                    <h1>{user.name}</h1>
-                  </div>
-                )}
-              </CardTitle>
+              <CardTitle>Sprzedaż - usługa</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col items-center">
               <Form {...form}>
