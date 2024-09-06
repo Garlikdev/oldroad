@@ -20,7 +20,7 @@ export default function AllBookingsComponent({
     isError,
   } = useQuery({
     queryKey: [
-      "bookings-all",
+      "bookings-history",
       userId,
       date ? moment(date).format("YYYY-MM-DD") : "",
     ],

@@ -13,7 +13,6 @@ import {
 import { cn } from "@/lib/utils";
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { Calendar } from "@/components/ui/calendar";
-import type { User } from "@/types/user";
 import { useUserStore } from "@/lib/hooks/userStore";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -42,6 +41,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import Link from "next/link";
+import AllBookingsComponent from "@/components/Bookings";
 
 const schema = z.object({
   userId: z.number().positive({ message: "User ID" }),
@@ -58,7 +59,9 @@ export default function AddService() {
   const { toast } = useToast();
 
   const [date, setDate] = useState<Date | undefined>(new Date());
+  const [historyDate, setHistoryDate] = useState<Date | undefined>(new Date());
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [isHistoryCalendarOpen, setIsHistoryCalendarOpen] = useState(false);
   const [serviceId, setServiceId] = useState<number | undefined>(undefined);
 
   const user = useUserStore((state) => state.user);
@@ -145,6 +148,11 @@ export default function AddService() {
     setIsCalendarOpen(false);
     setDate(date);
     form.setValue("createdAt", date ?? new Date());
+  };
+
+  const handleHistoryDateChange = (date: Date | undefined) => {
+    setIsHistoryCalendarOpen(false);
+    setHistoryDate(date);
   };
 
   const handleServiceChange = (value: string) => {
@@ -340,6 +348,49 @@ export default function AddService() {
                   </Button>
                 </form>
               </Form>
+            </CardContent>
+          </Card>
+          {/* Historia  */}
+          <Card className="relative z-10 w-full bg-background/80 sm:w-fit">
+            <CardHeader className="text-center">
+              <CardTitle className="mx-auto flex items-center gap-4">
+                <p>Historia usług</p>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col items-center">
+              {user && (
+                <div className="flex flex-col items-center">
+                  <Popover
+                    open={isHistoryCalendarOpen}
+                    onOpenChange={setIsHistoryCalendarOpen}
+                  >
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-[240px] justify-start text-left font-normal",
+                          !historyDate && "text-muted-foreground",
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {historyDate ? (
+                          format(historyDate, "PPP", { locale: pl })
+                        ) : (
+                          <span>Wybierz dzień</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={historyDate}
+                        onSelect={handleHistoryDateChange}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <AllBookingsComponent userId={user.id} date={historyDate} />
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
