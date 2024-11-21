@@ -2,7 +2,6 @@
 
 import prisma from "@/lib/db";
 import moment from "moment-timezone";
-import { startOfMonth, endOfMonth } from "date-fns"; // Optional for date manipulation
 
 type UserServicePrice = {
   userId: number;
@@ -15,55 +14,6 @@ type EditBooking = {
   price: number;
   createdAt: Date;
 };
-
-type Booking = {
-  id: number;
-  userId: number;
-  serviceId: number;
-  price: number;
-  createdAt: Date;
-  service: {
-    id: number;
-    // Add relevant service fields here
-  };
-  user: {
-    id: number;
-    // Add relevant user fields here
-  };
-};
-
-interface UserBookingSum {
-  userId: number;
-  createdAt: Date;
-  _sum: {
-    price: number | null;
-  };
-  user: {
-    name: string;
-  };
-}
-
-interface StartPriceSum {
-  createdAt: Date;
-  _sum: {
-    price: number | null;
-  };
-}
-
-interface GroupedData {
-  [monthYear: string]: {
-    users: {
-      userId: number;
-      userName: string;
-      priceSum: number;
-    }[];
-    totalUserBookingsPrice: number;
-  };
-}
-
-interface StartGroupedData {
-  [monthYear: string]: number;
-}
 
 export async function getServices() {
   return prisma.service.findMany();
@@ -148,40 +98,6 @@ export async function getAllBookings(userId: number, date?: string) {
   return bookings;
 }
 
-export async function getBookingsSummedByUserPerMonth() {
-  const userBookingSums = await prisma.booking.groupBy({
-    by: ["userId", "createdAt"],
-    _sum: {
-      price: true,
-    },
-    include: {
-      user: true,
-    },
-  });
-
-  // Group bookings by month-year
-  const groupedBookings = userBookingSums.reduce((acc: any, booking: any) => {
-    const monthYear = format(new Date(booking.createdAt), "yyyy-MM"); // Group by Year-Month
-
-    if (!acc[monthYear]) {
-      acc[monthYear] = {};
-    }
-
-    if (!acc[monthYear][booking.userId]) {
-      acc[monthYear][booking.userId] = {
-        userName: booking.user.name,
-        priceSum: 0,
-      };
-    }
-
-    acc[monthYear][booking.userId].priceSum += booking._sum.price || 0;
-
-    return acc;
-  }, {});
-
-  return groupedBookings;
-}
-
 export async function getBookingById(bookingId: number) {
   const booking = await prisma.booking.findUnique({
     where: { id: bookingId },
@@ -226,55 +142,6 @@ export async function getBookingsByUser(userId: number, date?: Date) {
   });
 
   return bookings;
-}
-
-export async function getMonthlyEarningsByUser(year: number, month: number) {
-  const timezone = "Europe/Warsaw"; // GMT+2
-
-  const startDate = moment
-    .tz({ year, month: month - 1 }, timezone)
-    .startOf("month")
-    .toDate();
-  const endDate = moment(startDate).endOf("month").toDate();
-
-  // First, group by userId and aggregate data
-  const result = await prisma.booking.groupBy({
-    by: ["userId"],
-    where: {
-      createdAt: {
-        gte: startDate,
-        lt: endDate,
-      },
-    },
-    _sum: {
-      price: true,
-    },
-    _count: {
-      id: true,
-    },
-  });
-
-  // Now, fetch user details separately
-  const userIds = result.map((entry) => entry.userId);
-  const users = await prisma.user.findMany({
-    where: {
-      id: {
-        in: userIds,
-      },
-    },
-  });
-
-  // Combine the user data with the aggregation results
-  const userMonthlyEarnings = result.map((entry) => {
-    const user = users.find((u) => u.id === entry.userId);
-    return {
-      userName: user?.name ?? "Unknown",
-      totalBookings: entry._count.id,
-      totalPrice: entry._sum.price,
-    };
-  });
-
-  return userMonthlyEarnings;
 }
 
 export async function createBooking(data: {

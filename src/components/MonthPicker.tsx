@@ -120,7 +120,7 @@ function MonthCal({
   });
 
   return (
-    <>
+    <div>
       <div className="relative flex items-center justify-center pt-1">
         <div className="text-sm font-medium">
           {callbacks?.yearLabel ? callbacks?.yearLabel(menuYear) : menuYear}
@@ -210,7 +210,7 @@ function MonthCal({
           })}
         </tbody>
       </table>
-    </>
+    </div>
   );
 }
 

@@ -224,7 +224,7 @@ export default function AddService() {
                       <FormItem className="flex flex-col">
                         <FormLabel>Data</FormLabel>
                         <FormControl>
-                          <>
+                          <div>
                             <Input
                               type="hidden"
                               {...field}
@@ -263,7 +263,7 @@ export default function AddService() {
                                 />
                               </PopoverContent>
                             </Popover>
-                          </>
+                          </div>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -291,7 +291,7 @@ export default function AddService() {
                           </FormControl>
                           <SelectContent>
                             {services ? (
-                              <>
+                              <div>
                                 {services?.map((service) => (
                                   <SelectItem
                                     key={service.id}
@@ -300,7 +300,7 @@ export default function AddService() {
                                     {service.name}
                                   </SelectItem>
                                 ))}
-                              </>
+                              </div>
                             ) : (
                               <p>Brak danych</p>
                             )}
