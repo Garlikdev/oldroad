@@ -117,6 +117,7 @@ export default function SprzedazStart() {
                       <FormItem className="flex flex-col">
                         <FormLabel>Data</FormLabel>
                         <FormControl>
+                          <>
                             <Input
                               type="hidden"
                               {...field}
@@ -155,6 +156,7 @@ export default function SprzedazStart() {
                                 />
                               </PopoverContent>
                             </Popover>
+                          </>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
