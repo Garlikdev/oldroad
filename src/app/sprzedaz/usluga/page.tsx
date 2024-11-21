@@ -182,8 +182,13 @@ export default function AddService() {
       <div className="container flex gap-4 px-1 sm:px-2">
         <div className="z-10 flex w-full flex-col items-center gap-4">
           <Card className="relative z-10 w-full bg-background/80 sm:w-fit">
-            <CardHeader className="text-center">
-              <CardTitle>Sprzedaż - usługa</CardTitle>
+          <CardHeader className="text-center">
+              <CardTitle className="mx-auto flex items-center gap-4">
+                <p>Sprzedaż usługa</p>
+                <Link href="/">
+                  <Button className="px-2">Powrót</Button>
+                </Link>
+              </CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col items-center">
               <Form {...form}>

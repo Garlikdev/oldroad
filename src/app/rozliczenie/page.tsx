@@ -17,10 +17,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Calendar } from "@/components/ui/calendar";
 import Link from "next/link";
 import { useUserStore } from "@/lib/hooks/userStore";
+import { MonthPicker } from "@/components/MonthPicker";
 
-export default function AllBookingsPage() {
+export default function RozliczeniePage() {
   const user = useUserStore((state) => state.user);
-  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [date, setDate] = useState<Date>();
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   const queryClient = useQueryClient();
@@ -42,7 +43,7 @@ export default function AllBookingsPage() {
           <Card className="relative z-10 w-full bg-background/80 sm:w-fit">
             <CardHeader className="text-center">
               <CardTitle className="mx-auto flex items-center gap-4">
-                <p>Historia usług</p>
+                <p>Rozliczenie miesięczne</p>
                 <Link href="/">
                   <Button className="px-2">Powrót</Button>
                 </Link>
@@ -51,34 +52,6 @@ export default function AllBookingsPage() {
             <CardContent className="flex flex-col items-center">
               {user && (
                 <div className="flex flex-col items-center">
-                  <Popover
-                    open={isCalendarOpen}
-                    onOpenChange={setIsCalendarOpen}
-                  >
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-[240px] justify-start text-left font-normal",
-                          !date && "text-muted-foreground",
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {date ? (
-                          format(date, "PPP", { locale: pl })
-                        ) : (
-                          <span>Wybierz dzień</span>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={date}
-                        onSelect={handleDateChange}
-                      />
-                    </PopoverContent>
-                  </Popover>
                   <AllBookingsComponent userId={user.id} date={date} />
                 </div>
               )}

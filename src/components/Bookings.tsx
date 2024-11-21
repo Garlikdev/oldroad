@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import moment from "moment";
-import { getAllBookings } from "@/lib/actions/service.action";
+import { getAllBookings, getAllStarts } from "@/lib/actions/service.action";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Pencil2Icon } from "@radix-ui/react-icons";
@@ -31,6 +31,19 @@ export default function AllBookingsComponent({
     enabled: !!date,
   });
 
+  const {
+    data: starts,
+    isLoading: isLoadingStarts,
+    isError: isStartsError,
+  } = useQuery({
+    queryKey: ["start", date ? moment(date).format("YYYY-MM-DD") : ""],
+    queryFn: async () =>
+      date
+        ? await getAllStarts(moment(date).format("YYYY-MM-DD"))
+        : Promise.resolve([]),
+    enabled: !!date,
+  });
+
   if (isLoadingBookings) return <div>Ładowanie...</div>;
   if (isError) return <div>Błąd ładowania danych</div>;
 
@@ -41,10 +54,27 @@ export default function AllBookingsComponent({
 
   return (
     <div className="flex flex-col items-center gap-4 py-4">
+      {starts?.length ? (
+        <div className="flex flex-col">
+          {starts?.map((start) => (
+            <div
+              key={start.id}
+              className={`flex gap-1 ${start?.price ? "bg-green-300 dark:bg-green-700" : "bg-gred-500"} px-2 py-1 rounded-lg`}
+            >
+              <div className="flex justify-end">
+                <p>Startowy:</p>
+              </div>
+              <div className="flex justify-end">{start.price}zł</div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="bg-red-300 dark:bg-red-700 px-2 py-1 rounded-lg">Brak startowego</p>
+      )}
       {bookings?.length ? (
         <div className="flex flex-col">
           <div className="flex w-full items-center justify-center">
-            <p>Suma: {totalPrice}zł</p>
+            <p>Suma usług: {totalPrice}zł</p>
           </div>
           {bookings?.map((booking) => (
             <div
