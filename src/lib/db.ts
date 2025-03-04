@@ -4,7 +4,7 @@ import { PrismaClient } from "@prisma/client";
 import ws from "ws";
 
 neonConfig.webSocketConstructor = ws;
-const connectionString = `${process.env.DATABASE_URL}`;
+const connectionString = process.env.DATABASE_URL;
 
 const pool = new Pool({ connectionString });
 
