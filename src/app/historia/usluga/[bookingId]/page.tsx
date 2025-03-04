@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import EditBooking from "./EditBooking";
 
@@ -10,11 +10,12 @@ type User = {
   pin: number;
 };
 
-export default function HomePage({
-  params,
-}: {
-  params: { bookingId: string };
-}) {
+export default function HomePage(
+  props: {
+    params: Promise<{ bookingId: string }>;
+  }
+) {
+  const params = use(props.params);
   const [user, setUser] = useState<User | null>(null);
   const [isLoadingUserData, setIsLoadingUserData] = useState(true);
 
