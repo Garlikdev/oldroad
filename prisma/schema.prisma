@@ -11,7 +11,7 @@ datasource db {
 model User {
   id       Int                @id @default(autoincrement())
   name     String             @unique
-  pin      Int                @unique
+  pin      String             @unique
   role     String             @default("USER") @db.VarChar(255)
   bookings Booking[]
   prices   UserServicePrice[]

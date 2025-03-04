@@ -38,7 +38,7 @@ export async function getUsers() {
   return prisma.user.findMany();
 }
 
-export async function getUser(pin: number) {
+export async function getUser(pin: string) {
   const userData = await prisma.user.findUnique({
     where: { pin },
     select: {

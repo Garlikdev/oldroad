@@ -8,7 +8,7 @@ export const preferredRegion = ["arn1", "fra1"];
 type User = {
   name: string;
   id: number;
-  pin: number;
+  pin: string;
 };
 
 export default function UserData({

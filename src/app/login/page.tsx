@@ -53,7 +53,7 @@ export default function Login() {
 
   const retrieveUser = useMutation({
     mutationKey: ["retrieveUser"],
-    mutationFn: async (pin: number) => {
+    mutationFn: async (pin: string) => {
       const user = await getUser(pin);
       if (user) {
         handleLogin(user);
@@ -85,7 +85,7 @@ export default function Login() {
   });
 
   function onSubmit(data: z.infer<typeof FormSchema>) {
-    retrieveUser.mutate(parseInt(data.pin));
+    retrieveUser.mutate(data.pin);
   }
 
   useEffect(() => {

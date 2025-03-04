@@ -7,14 +7,12 @@ import EditBooking from "./EditBooking";
 type User = {
   name: string;
   id: number;
-  pin: number;
+  pin: string;
 };
 
-export default function HomePage(
-  props: {
-    params: Promise<{ bookingId: string }>;
-  }
-) {
+export default function HomePage(props: {
+  params: Promise<{ bookingId: string }>;
+}) {
   const params = use(props.params);
   const [user, setUser] = useState<User | null>(null);
   const [isLoadingUserData, setIsLoadingUserData] = useState(true);
@@ -32,7 +30,7 @@ export default function HomePage(
     <main className="relative flex min-h-screen w-full flex-col items-center gap-4 overflow-hidden py-4">
       <div className="container flex gap-4 px-1 sm:px-2">
         <div className="z-10 flex w-full flex-col items-center gap-4">
-          <Card className="relative z-10 w-full bg-background/80 sm:w-fit">
+          <Card className="bg-background/80 relative z-10 w-full sm:w-fit">
             <CardHeader className="text-center">
               <CardTitle>
                 <div className="flex items-center justify-center gap-4">
