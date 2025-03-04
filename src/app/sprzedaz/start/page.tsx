@@ -20,7 +20,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createStart } from "@/lib/actions/service.action";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/components/ui/use-toast";
 import {
   Form,
   FormControl,
@@ -30,6 +29,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { toast } from "sonner";
 
 const schema = z.object({
   price: z.number().positive({ message: "Price" }),
@@ -40,8 +40,6 @@ type StartFormValues = z.infer<typeof schema>;
 
 export default function SprzedazStart() {
   const queryClient = useQueryClient();
-
-  const { toast } = useToast();
 
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
@@ -62,8 +60,7 @@ export default function SprzedazStart() {
       await createStart(data);
     },
     onSuccess: async () => {
-      toast({
-        title: "Sukces",
+      toast.success("Sukces", {
         description: `Startowy hajs dodany!`,
         className: "bg-green-400 dark:bg-green-700",
         duration: 4000,
@@ -73,9 +70,7 @@ export default function SprzedazStart() {
       });
     },
     onError: () => {
-      toast({
-        variant: "destructive",
-        title: "Błąd",
+      toast.error("Błąd", {
         description: "Nie udało się dodać startowego siana!",
         duration: 4000,
       });
@@ -100,7 +95,7 @@ export default function SprzedazStart() {
     <main className="relative flex min-h-screen w-full flex-col items-center gap-4 overflow-hidden py-4">
       <div className="container flex gap-4 px-1 sm:px-2">
         <div className="z-10 flex w-full flex-col items-center gap-4">
-          <Card className="relative z-10 w-full bg-background/80 sm:w-fit">
+          <Card className="bg-background/80 relative z-10 w-full sm:w-fit">
             <CardHeader className="text-center">
               <CardTitle>Sprzedaż - startowy hajs</CardTitle>
             </CardHeader>

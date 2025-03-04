@@ -3,7 +3,7 @@ import Providers from "@/lib/providers";
 import Nav from "../components/Nav";
 import { ThemeProvider } from "../components/theme/theme-provider";
 import { GeistSans } from "geist/font/sans";
-import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from "@/components/ui/sonner";
 import { getUsers } from "@/lib/actions/service.action";
 import {
   dehydrate,
@@ -34,7 +34,7 @@ export default async function RootLayout({
       lang="pl"
       suppressHydrationWarning
     >
-      <body className="relative min-h-screen bg-background bg-neutral-200 bg-opacity-50 font-sans text-neutral-950 antialiased dark:bg-neutral-900 dark:text-neutral-50 dark:text-opacity-90">
+      <body className="bg-opacity-50 dark:text-opacity-90 relative min-h-screen bg-neutral-200 font-sans text-neutral-950 antialiased dark:bg-neutral-900 dark:text-neutral-50">
         <Providers>
           <HydrationBoundary state={dehydrate(queryClient)}>
             <ThemeProvider

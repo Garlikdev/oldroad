@@ -23,7 +23,6 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
 import {
   Form,
   FormControl,
@@ -41,6 +40,7 @@ import {
 } from "@/components/ui/popover";
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { Calendar } from "@/components/ui/calendar";
+import { toast } from "sonner";
 
 export const runtime = "edge";
 export const preferredRegion = ["arn1", "fra1"];
@@ -57,7 +57,6 @@ const EditBooking = ({ bookingId }: { bookingId: string }) => {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [serviceId, setServiceId] = useState<number | undefined>(undefined);
-  const { toast } = useToast();
   const router = useRouter();
 
   const queryClient = useQueryClient();
@@ -116,10 +115,8 @@ const EditBooking = ({ bookingId }: { bookingId: string }) => {
       }
     },
     onSuccess: async () => {
-      toast({
-        title: "Sukces",
+      toast.success("Sukces", {
         description: `Usługa edytowana!`,
-        className: "bg-green-400 dark:bg-green-700",
         duration: 1000,
       });
       await queryClient.invalidateQueries({
@@ -137,9 +134,7 @@ const EditBooking = ({ bookingId }: { bookingId: string }) => {
       router.push("/");
     },
     onError: () => {
-      toast({
-        variant: "destructive",
-        title: "Błąd",
+      toast.error("Błąd", {
         description: "Nie udało się zapisać zmian",
         duration: 4000,
       });

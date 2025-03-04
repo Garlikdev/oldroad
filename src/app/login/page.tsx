@@ -19,7 +19,7 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { useMutation } from "@tanstack/react-query";
 import { getUser } from "@/lib/actions/service.action";
 import { useEffect } from "react";
@@ -60,8 +60,7 @@ export default function Login() {
         router.push("/");
         return user;
       } else {
-        toast({
-          title: "Błąd",
+        toast.error("Błąd", {
           description: `Niepoprawny pin`,
           duration: 1000,
         });
@@ -70,8 +69,7 @@ export default function Login() {
     },
     onSuccess: (data) => {
       if (data) {
-        toast({
-          title: "Sukces",
+        toast.success("Sukces", {
           description: `Zalogowano`,
           className: "bg-green-400 dark:bg-green-700",
           duration: 1000,
@@ -79,9 +77,7 @@ export default function Login() {
       }
     },
     onError: () => {
-      toast({
-        variant: "destructive",
-        title: "Błąd",
+      toast.error("Błąd", {
         description: `Nie udało się zalogować`,
         duration: 4000,
       });
@@ -100,7 +96,7 @@ export default function Login() {
     <main className="relative flex min-h-screen w-full flex-col items-center gap-4 overflow-hidden py-4">
       <div className="container flex gap-4 px-1 sm:px-2">
         <div className="z-10 flex w-full flex-col items-center gap-4">
-          <Card className="relative z-10 w-full bg-background/80 sm:w-fit">
+          <Card className="bg-background/80 relative z-10 w-full sm:w-fit">
             <CardHeader className="text-center">
               <CardTitle>Logowanie</CardTitle>
             </CardHeader>

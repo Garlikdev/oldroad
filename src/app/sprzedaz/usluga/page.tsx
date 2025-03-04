@@ -31,7 +31,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/components/ui/use-toast";
 import {
   Form,
   FormControl,
@@ -43,6 +42,7 @@ import {
 } from "@/components/ui/form";
 import Link from "next/link";
 import AllBookingsComponent from "@/components/Bookings";
+import { toast } from "sonner";
 
 const schema = z.object({
   userId: z.number().positive({ message: "User ID" }),
@@ -55,8 +55,6 @@ type BookingFormValues = z.infer<typeof schema>;
 
 export default function AddService() {
   const queryClient = useQueryClient();
-
-  const { toast } = useToast();
 
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [historyDate, setHistoryDate] = useState<Date | undefined>(new Date());
@@ -112,8 +110,7 @@ export default function AddService() {
       await createBooking(data);
     },
     onSuccess: async () => {
-      toast({
-        title: "Sukces",
+      toast.success("Sukces", {
         description: `Wykonanie usługi dodane!`,
         className: "bg-green-400 dark:bg-green-700",
         duration: 4000,
@@ -131,9 +128,7 @@ export default function AddService() {
       form.setValue("price", 0);
     },
     onError: () => {
-      toast({
-        variant: "destructive",
-        title: "Błąd",
+      toast.error("Błąd", {
         description: "Nie udało się zapisać wykonanej usługi",
         duration: 4000,
       });
@@ -181,8 +176,8 @@ export default function AddService() {
     <main className="relative flex min-h-screen w-full flex-col items-center gap-4 overflow-hidden py-4">
       <div className="container flex gap-4 px-1 sm:px-2">
         <div className="z-10 flex w-full flex-col items-center gap-4">
-          <Card className="relative z-10 w-full bg-background/80 sm:w-fit">
-          <CardHeader className="text-center">
+          <Card className="bg-background/80 relative z-10 w-full sm:w-fit">
+            <CardHeader className="text-center">
               <CardTitle className="mx-auto flex items-center gap-4">
                 <p>Sprzedaż usługa</p>
                 <Link href="/">
@@ -356,7 +351,7 @@ export default function AddService() {
             </CardContent>
           </Card>
           {/* Historia  */}
-          <Card className="relative z-10 w-full bg-background/80 sm:w-fit">
+          <Card className="bg-background/80 relative z-10 w-full sm:w-fit">
             <CardHeader className="text-center">
               <CardTitle className="mx-auto flex items-center gap-4">
                 <p>Historia usług</p>
