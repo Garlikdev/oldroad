@@ -9,7 +9,7 @@ export default function NotFound() {
           <h1 className="text-4xl shadow-lg">Strona nie istnieje</h1>
           <div className="relative h-12 w-12 items-center">
             <h2 className="absolute left-0 z-10 text-4xl shadow-lg">😥</h2>
-            <h2 className="absolute top-0 z-[5] text-4xl blur-sm">😥</h2>
+            <h2 className="absolute top-0 z-5 text-4xl blur-xs">😥</h2>
           </div>
           <Link href={"/"}>
             <Button>Powrót do menu</Button>
