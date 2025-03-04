@@ -173,7 +173,7 @@ export default function AddService() {
   }, [date, form]);
 
   return (
-    <main className="relative flex min-h-screen w-full flex-col items-center gap-4 overflow-hidden py-4">
+    <main className="align relative flex min-h-screen w-full flex-col items-center gap-4 overflow-hidden py-4">
       <div className="container flex gap-4 px-1 sm:px-2">
         <div className="z-10 flex w-full flex-col items-center gap-4">
           <Card className="bg-background/80 relative z-10 w-full sm:w-fit">
