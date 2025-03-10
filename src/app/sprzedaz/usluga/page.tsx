@@ -43,6 +43,7 @@ import {
 import Link from "next/link";
 import AllBookingsComponent from "@/components/Bookings";
 import { toast } from "sonner";
+import { Spinner } from "@/components/ui/spinner";
 
 const schema = z.object({
   userId: z.number().positive({ message: "User ID" }),
@@ -78,9 +79,10 @@ export default function AddService() {
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: {
-      userId: user?.id,
+      userId: user?.id || 0,
       serviceId: undefined,
-      price: 0,
+      price: undefined,
+      createdAt: new Date(),
     },
   });
 
@@ -175,8 +177,8 @@ export default function AddService() {
   return (
     <main className="align relative flex min-h-screen w-full flex-col items-center gap-4 overflow-hidden py-4">
       <div className="container flex gap-4 px-1 sm:px-2">
-        <div className="z-10 flex w-full flex-col items-center gap-4">
-          <Card className="bg-background/80 relative z-10 w-full sm:w-fit">
+        <div className="flex w-full flex-col items-center gap-4">
+          <Card className="bg-background/80 relative w-full sm:w-fit">
             <CardHeader className="text-center">
               <CardTitle className="mx-auto flex items-center gap-4">
                 <p>Sprzedaż usługa</p>
@@ -201,12 +203,18 @@ export default function AddService() {
                           <Input
                             placeholder="Frygacz"
                             {...field}
-                            value={user?.id}
+                            value={user?.id || ""}
                             className="hidden"
                             disabled
                           />
                         </FormControl>
-                        <p>{user?.name}</p>
+                        <p>
+                          {user ? (
+                            user?.name
+                          ) : (
+                            <Spinner size="small" className="justify-center" />
+                          )}
+                        </p>
                         {/* <FormDescription>Zalogowany użytkownik</FormDescription> */}
                         <FormMessage />
                       </FormItem>
@@ -351,7 +359,7 @@ export default function AddService() {
             </CardContent>
           </Card>
           {/* Historia  */}
-          <Card className="bg-background/80 relative z-10 w-full sm:w-fit">
+          <Card className="bg-background/80 relative w-full sm:w-fit">
             <CardHeader className="text-center">
               <CardTitle className="mx-auto flex items-center gap-4">
                 <p>Historia usług</p>

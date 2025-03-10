@@ -1,6 +1,7 @@
 "use server";
 
 import prisma from "@/lib/db";
+import { Prisma } from "@prisma/client";
 import moment from "moment-timezone";
 
 type UserServicePrice = {
@@ -11,6 +12,11 @@ type UserServicePrice = {
 
 type EditBooking = {
   serviceId: number;
+  price: number;
+  createdAt: Date;
+};
+
+export type BookingChartData = {
   price: number;
   createdAt: Date;
 };
@@ -96,6 +102,41 @@ export async function getAllBookings(userId: number, date?: string) {
   }
 
   return bookings;
+}
+
+export async function getAllBookingsChart(
+  userId: number,
+  startDate: string,
+  endDate: string,
+): Promise<BookingChartData[]> {
+  const timezone = "Europe/Warsaw";
+
+  try {
+    const filterStart = moment.tz(startDate, timezone).startOf("day");
+    const filterEnd = moment.tz(endDate, timezone).endOf("day");
+
+    const whereClause: Prisma.BookingWhereInput = {
+      AND: [
+        { createdAt: { gte: filterStart.toDate() } },
+        { createdAt: { lte: filterEnd.toDate() } },
+        userId !== 3 ? { userId } : {},
+      ],
+    };
+
+    const bookings = await prisma.booking.findMany({
+      where: whereClause,
+      select: {
+        price: true,
+        createdAt: true,
+      },
+      orderBy: { createdAt: "asc" },
+    });
+
+    return bookings;
+  } catch (error) {
+    console.error("Database Error:", error);
+    throw new Error("Failed to fetch bookings");
+  }
 }
 
 export async function getBookingById(bookingId: number) {

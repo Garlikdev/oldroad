@@ -92,107 +92,98 @@ export default function SprzedazStart() {
   }, [date, form]);
 
   return (
-    <main className="relative flex min-h-screen w-full flex-col items-center gap-4 overflow-hidden py-4">
-      <div className="container flex gap-4 px-1 sm:px-2">
-        <div className="z-10 flex w-full flex-col items-center gap-4">
-          <Card className="bg-background/80 relative z-10 w-full sm:w-fit">
-            <CardHeader className="text-center">
-              <CardTitle>Sprzedaż - startowy hajs</CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col items-center">
-              <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className="w-full space-y-6"
-                >
-                  <FormField
-                    name="createdAt"
-                    control={form.control}
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col">
-                        <FormLabel>Data</FormLabel>
-                        <FormControl>
-                          <>
-                            <Input
-                              type="hidden"
-                              {...field}
-                              value={
-                                field.value ? field.value.toISOString() : ""
-                              }
-                            />
-                            <Popover
-                              open={isCalendarOpen}
-                              onOpenChange={setIsCalendarOpen}
+    <div className="relative flex w-full flex-col items-center gap-4 overflow-hidden">
+      <Card className="bg-background/80 relative z-10 w-full sm:w-fit">
+        <CardHeader className="text-center">
+          <CardTitle>Sprzedaż - startowy hajs</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col items-center">
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="w-full space-y-6"
+            >
+              <FormField
+                name="createdAt"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Data</FormLabel>
+                    <FormControl>
+                      <div>
+                        <Input
+                          type="hidden"
+                          {...field}
+                          value={field.value ? field.value.toISOString() : ""}
+                        />
+                        <Popover
+                          open={isCalendarOpen}
+                          onOpenChange={setIsCalendarOpen}
+                        >
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "w-[240px] justify-start text-left font-normal",
+                                !date && "text-muted-foreground",
+                              )}
                             >
-                              <PopoverTrigger asChild>
-                                <Button
-                                  variant={"outline"}
-                                  className={cn(
-                                    "w-[240px] justify-start text-left font-normal",
-                                    !date && "text-muted-foreground",
-                                  )}
-                                >
-                                  <CalendarIcon className="mr-2 h-4 w-4" />
-                                  {date ? (
-                                    format(date, "PPP", { locale: pl })
-                                  ) : (
-                                    <span>Wybierz dzień</span>
-                                  )}
-                                </Button>
-                              </PopoverTrigger>
-                              <PopoverContent
-                                className="w-auto p-0"
-                                align="start"
-                              >
-                                <Calendar
-                                  mode="single"
-                                  selected={date}
-                                  onSelect={handleDateChange}
-                                />
-                              </PopoverContent>
-                            </Popover>
-                          </>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="price"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Kwota startowa</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Cena"
-                            {...field}
-                            value={field.value ?? ""}
-                            onChange={(e) =>
-                              field.onChange(parseInt(e.target.value) || "")
-                            }
-                          />
-                        </FormControl>
-                        <FormDescription>Możesz zmienić kwotę</FormDescription>
-                        {/* <FormMessage /> */}
-                      </FormItem>
-                    )}
-                  />
-                  <Button
-                    type="submit"
-                    className="mx-auto w-full"
-                    disabled={
-                      createStartMutation.isPending || !user || priceField === 0
-                    }
-                  >
-                    {createStartMutation.isPending ? "Dodawanie..." : "Dodaj"}
-                  </Button>
-                </form>
-              </Form>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    </main>
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {date ? (
+                                format(date, "PPP", { locale: pl })
+                              ) : (
+                                <span>Wybierz dzień</span>
+                              )}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={date}
+                              onSelect={handleDateChange}
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="price"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Kwota startowa</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Cena"
+                        {...field}
+                        value={field.value ?? ""}
+                        onChange={(e) =>
+                          field.onChange(parseInt(e.target.value) || "")
+                        }
+                      />
+                    </FormControl>
+                    <FormDescription>Możesz zmienić kwotę</FormDescription>
+                    {/* <FormMessage /> */}
+                  </FormItem>
+                )}
+              />
+              <Button
+                type="submit"
+                className="mx-auto w-full"
+                disabled={
+                  createStartMutation.isPending || !user || priceField === 0
+                }
+              >
+                {createStartMutation.isPending ? "Dodawanie..." : "Dodaj"}
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

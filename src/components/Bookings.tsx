@@ -44,8 +44,8 @@ export default function AllBookingsComponent({
     enabled: !!date,
   });
 
-  if (isLoadingBookings) return <div>Ładowanie...</div>;
-  if (isError) return <div>Błąd ładowania danych</div>;
+  if (isLoadingBookings || isLoadingStarts) return <div>Ładowanie...</div>;
+  if (isError || isStartsError) return <div>Błąd ładowania danych</div>;
 
   const totalPrice = bookings?.reduce(
     (sum: number, booking: { price: number }) => sum + booking.price,
@@ -59,7 +59,7 @@ export default function AllBookingsComponent({
           {starts?.map((start) => (
             <div
               key={start.id}
-              className={`flex gap-1 ${start?.price ? "bg-green-300 dark:bg-green-700" : "bg-gred-500"} px-2 py-1 rounded-lg`}
+              className={`flex gap-1 ${start?.price ? "bg-green-300 dark:bg-green-700" : "bg-gred-500"} rounded-lg px-2 py-1`}
             >
               <div className="flex justify-end">
                 <p>Startowy:</p>
@@ -69,7 +69,9 @@ export default function AllBookingsComponent({
           ))}
         </div>
       ) : (
-        <p className="bg-red-300 dark:bg-red-700 px-2 py-1 rounded-lg">Brak startowego</p>
+        <p className="rounded-lg bg-red-300 px-2 py-1 dark:bg-red-700">
+          Brak startowego
+        </p>
       )}
       {bookings?.length ? (
         <div className="flex flex-col">
