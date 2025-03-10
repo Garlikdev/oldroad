@@ -175,20 +175,20 @@ export default function AddService() {
 
   return (
     <div className="flex w-full flex-col items-center gap-4">
-      <div className="w-full space-y-4 text-center sm:w-fit">
+      <div className="space-y-6">
         <h1>Sprzedaż usługa</h1>
         <div className="flex flex-col">
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}
-              className="flex w-full flex-col items-center justify-center space-y-4"
+              className="w-full space-y-6"
             >
               <FormField
                 name="userId"
                 control={form.control}
                 render={({ field }) => (
                   <FormItem className="flex flex-col items-center">
-                    <FormLabel>Frygacz</FormLabel>
+                    <FormLabel className="text-base">Frygacz</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Frygacz"
@@ -198,9 +198,14 @@ export default function AddService() {
                         disabled
                       />
                     </FormControl>
-                    <span className="flex items-center justify-center">
-                      {user ? user?.name : <Spinner size="small" />}
-                    </span>
+                    <div className="bg-muted flex h-10 items-center justify-center rounded-md border px-3">
+                      {user ? (
+                        <span className="font-medium">{user.name}</span>
+                      ) : (
+                        <Spinner size="small" />
+                      )}
+                    </div>
+
                     <FormMessage />
                   </FormItem>
                 )}
@@ -210,7 +215,7 @@ export default function AddService() {
                 control={form.control}
                 render={({ field }) => (
                   <FormItem className="flex flex-col items-center">
-                    <FormLabel>Data</FormLabel>
+                    <FormLabel className="text-base">Data</FormLabel>
                     <FormControl>
                       <div>
                         <Input
@@ -224,18 +229,13 @@ export default function AddService() {
                         >
                           <PopoverTrigger asChild>
                             <Button
-                              variant={"outline"}
-                              className={cn(
-                                "justify-start text-left text-lg",
-                                !date && "text-muted-foreground",
-                              )}
+                              variant="outline"
+                              className="h-12 justify-start text-base"
                             >
                               <CalendarIcon className="mr-2 h-4 w-4" />
-                              {date ? (
-                                format(date, "PPP", { locale: pl })
-                              ) : (
-                                <span>Wybierz dzień</span>
-                              )}
+                              {date
+                                ? format(date, "PPP", { locale: pl })
+                                : "Wybierz dzień"}
                             </Button>
                           </PopoverTrigger>
                           <PopoverContent align="center" className="w-full">
@@ -257,14 +257,14 @@ export default function AddService() {
                 control={form.control}
                 render={({ field }) => (
                   <FormItem className="flex flex-col items-center">
-                    <FormLabel>Usługa</FormLabel>
+                    <FormLabel className="text-base">Usługa</FormLabel>
                     <Select
                       value={field.value ? field.value.toString() : ""}
                       name={field.name}
                       onValueChange={handleServiceChange}
                     >
                       <FormControl className="w-full">
-                        <SelectTrigger>
+                        <SelectTrigger className="h-12 text-base">
                           <SelectValue
                             onBlur={field.onBlur}
                             ref={field.ref}
@@ -298,8 +298,8 @@ export default function AddService() {
                 name="price"
                 render={({ field }) => (
                   <FormItem className="flex flex-col items-center">
-                    <FormLabel>Cena</FormLabel>
-                    <FormControl className="w-[100px]">
+                    <FormLabel className="text-base">Cena</FormLabel>
+                    <FormControl className="h-12 max-w-[160px] text-base">
                       <Input
                         placeholder="Cena"
                         {...field}
@@ -322,7 +322,7 @@ export default function AddService() {
               />
               <Button
                 type="submit"
-                className="mx-auto text-lg"
+                className="h-12 w-full text-base"
                 disabled={
                   createBookingMutation.isPending ||
                   isLoadingPrice ||
@@ -331,7 +331,14 @@ export default function AddService() {
                   !priceField
                 }
               >
-                {createBookingMutation.isPending ? "Dodawanie..." : "Dodaj"}
+                {createBookingMutation.isPending ? (
+                  <div className="flex items-center gap-2">
+                    <Spinner size="small" />
+                    Dodawanie...
+                  </div>
+                ) : (
+                  "Dodaj"
+                )}
               </Button>
             </form>
           </Form>
@@ -352,7 +359,7 @@ export default function AddService() {
                   <Button
                     variant={"outline"}
                     className={cn(
-                      "justify-start text-left",
+                      "h-12 justify-start text-left text-base",
                       !historyDate && "text-muted-foreground",
                     )}
                   >
@@ -372,7 +379,9 @@ export default function AddService() {
                   />
                 </PopoverContent>
               </Popover>
-              <AllBookingsComponent userId={user.id} date={historyDate} />
+              {user && (
+                <AllBookingsComponent userId={user.id} date={historyDate} />
+              )}
             </div>
           )}
         </div>
