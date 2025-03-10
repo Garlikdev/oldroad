@@ -4,9 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import moment from "moment";
 import "moment/locale/pl";
 import { getAllStarts } from "@/lib/actions/service.action";
-// import Link from "next/link";
-// import { Button } from "@/components/ui/button";
-// import { Pencil2Icon } from "@radix-ui/react-icons";
 
 export default function AllStartsComponent({
   date,

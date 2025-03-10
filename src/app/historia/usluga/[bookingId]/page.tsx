@@ -27,29 +27,19 @@ export default function HomePage(props: {
   }, []);
 
   return (
-    <main className="relative flex min-h-screen w-full flex-col items-center gap-4 overflow-hidden py-4">
-      <div className="container flex gap-4 px-1 sm:px-2">
-        <div className="z-10 flex w-full flex-col items-center gap-4">
-          <Card className="bg-background/80 relative z-10 w-full sm:w-fit">
-            <CardHeader className="text-center">
-              <CardTitle>
-                <div className="flex items-center justify-center gap-4">
-                  <h1>Edycja zapisanej usługi</h1>
-                </div>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col items-center">
-              {isLoadingUserData ? (
-                <div>Ładowanie...</div>
-              ) : user && params.bookingId ? (
-                <EditBooking bookingId={params.bookingId} />
-              ) : (
-                "Zaloguj się"
-              )}
-            </CardContent>
-          </Card>
-        </div>
+    <div className="flex w-full flex-col items-center gap-4">
+      <div className="w-full space-y-4 text-center sm:w-fit">
+        <h1>Edycja zapisanej usługi</h1>
       </div>
-    </main>
+      <div className="flex flex-col items-center">
+        {isLoadingUserData ? (
+          <div>Ładowanie...</div>
+        ) : user && params.bookingId ? (
+          <EditBooking bookingId={params.bookingId} />
+        ) : (
+          "Zaloguj się"
+        )}
+      </div>
+    </div>
   );
 }

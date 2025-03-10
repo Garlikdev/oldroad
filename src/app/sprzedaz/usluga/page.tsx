@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { pl } from "date-fns/locale";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -40,7 +39,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import Link from "next/link";
 import AllBookingsComponent from "@/components/Bookings";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";

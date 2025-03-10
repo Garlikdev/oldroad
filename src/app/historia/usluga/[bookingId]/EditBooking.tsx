@@ -172,7 +172,7 @@ const EditBooking = ({ bookingId }: { bookingId: string }) => {
   }, [booking?.user, serviceId, refetchPrice]);
 
   if (booking === null) {
-    return <div>Brak usługi o podanym</div>;
+    return <div>Brak usługi o podanej nazwie</div>;
   }
 
   if (isLoadingBooking || isLoadingServices || !bookingId) {
@@ -181,15 +181,18 @@ const EditBooking = ({ bookingId }: { bookingId: string }) => {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-6">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="flex w-full flex-col items-center justify-center space-y-4"
+      >
         <FormField
           name="createdAt"
           control={form.control}
           render={({ field }) => (
-            <FormItem className="flex flex-col">
+            <FormItem className="flex flex-col items-center">
               <FormLabel>Data</FormLabel>
               <FormControl>
-                <>
+                <div>
                   <Input
                     type="hidden"
                     {...field}
@@ -203,7 +206,7 @@ const EditBooking = ({ bookingId }: { bookingId: string }) => {
                       <Button
                         variant={"outline"}
                         className={cn(
-                          "w-[240px] justify-start text-left font-normal",
+                          "justify-start text-left text-lg",
                           !date && "text-muted-foreground",
                         )}
                       >
@@ -215,7 +218,7 @@ const EditBooking = ({ bookingId }: { bookingId: string }) => {
                         )}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
+                    <PopoverContent align="center" className="w-full">
                       <Calendar
                         mode="single"
                         selected={date}
@@ -223,7 +226,7 @@ const EditBooking = ({ bookingId }: { bookingId: string }) => {
                       />
                     </PopoverContent>
                   </Popover>
-                </>
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -233,14 +236,14 @@ const EditBooking = ({ bookingId }: { bookingId: string }) => {
           name="serviceId"
           control={form.control}
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="flex flex-col items-center">
               <FormLabel>Usługa</FormLabel>
               <Select
                 value={field.value ? field.value.toString() : ""}
                 name={field.name}
                 onValueChange={handleServiceChange}
               >
-                <FormControl>
+                <FormControl className="w-full">
                   <SelectTrigger>
                     <SelectValue
                       onBlur={field.onBlur}
@@ -249,9 +252,9 @@ const EditBooking = ({ bookingId }: { bookingId: string }) => {
                     />
                   </SelectTrigger>
                 </FormControl>
-                <SelectContent>
+                <SelectContent align="center">
                   {services ? (
-                    <>
+                    <div>
                       {services?.map((service) => (
                         <SelectItem
                           key={service.id}
@@ -260,13 +263,12 @@ const EditBooking = ({ bookingId }: { bookingId: string }) => {
                           {service.name}
                         </SelectItem>
                       ))}
-                    </>
+                    </div>
                   ) : (
                     <p>Brak danych</p>
                   )}
                 </SelectContent>
               </Select>
-              {/* <FormDescription>Którą usługę wykonujesz?</FormDescription> */}
               <FormMessage />
             </FormItem>
           )}
@@ -275,9 +277,9 @@ const EditBooking = ({ bookingId }: { bookingId: string }) => {
           control={form.control}
           name="price"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="flex flex-col items-center">
               <FormLabel>Cena zapisana: {booking?.price}</FormLabel>
-              <FormControl>
+              <FormControl className="w-[100px]">
                 <Input
                   placeholder="Cena"
                   {...field}
@@ -299,7 +301,7 @@ const EditBooking = ({ bookingId }: { bookingId: string }) => {
         />
         <Button
           type="submit"
-          className="mx-auto w-full"
+          className="mx-auto text-lg"
           disabled={
             editBookingMutation.isPending ||
             isLoadingPrice ||
