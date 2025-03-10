@@ -94,25 +94,23 @@ export function EarningsChart() {
   if (isError) return <div>Error loading data</div>;
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>
+    <div className="flex w-full flex-col">
+      <div className="flex w-full items-center justify-between">
+        <h1>
           {user?.id === 3 ? "Rozliczenie usług" : "Twoje rozliczenie usług"}
-        </CardTitle>
-        <CardDescription>
-          <Select value={viewMode} onValueChange={(v) => setViewMode(v as any)}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="View mode" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="daily">Ostatnie 7 dni</SelectItem>
-              <SelectItem value="monthly">Ostatnie 6 miesięcy</SelectItem>
-            </SelectContent>
-          </Select>
-        </CardDescription>
-      </CardHeader>
+        </h1>
+        <Select value={viewMode} onValueChange={(v) => setViewMode(v as any)}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="View mode" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="daily">Ostatnie 7 dni</SelectItem>
+            <SelectItem value="monthly">Ostatnie 6 miesięcy</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
 
-      <CardContent>
+      <div>
         {isLoading ? (
           <Skeleton className="h-[300px] w-full" />
         ) : (
@@ -156,16 +154,7 @@ export function EarningsChart() {
             </ResponsiveContainer>
           </div>
         )}
-      </CardContent>
-
-      <CardFooter>
-        <div className="text-muted-foreground flex items-center gap-2 text-sm">
-          <TrendingUp className="h-4 w-4" />
-          <span>
-            {viewMode === "daily" ? "Ostatnie 7 dni" : "Ostatnie 6 miesięcy"}
-          </span>
-        </div>
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
   );
 }

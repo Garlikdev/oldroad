@@ -92,22 +92,20 @@ export default function SprzedazStart() {
   }, [date, form]);
 
   return (
-    <div className="relative flex w-full flex-col items-center gap-4 overflow-hidden">
-      <Card className="bg-background/80 relative z-10 w-full sm:w-fit">
-        <CardHeader className="text-center">
-          <CardTitle>Sprzedaż - startowy hajs</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col items-center">
+    <div className="flex w-full flex-col items-center gap-4">
+      <div className="w-full space-y-4 text-center sm:w-fit">
+        <h1>Sprzedaż - startowy hajs</h1>
+        <div className="flex flex-col">
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}
-              className="w-full space-y-6"
+              className="flex w-full flex-col items-center justify-center space-y-4"
             >
               <FormField
                 name="createdAt"
                 control={form.control}
                 render={({ field }) => (
-                  <FormItem className="flex flex-col">
+                  <FormItem className="flex flex-col items-center">
                     <FormLabel>Data</FormLabel>
                     <FormControl>
                       <div>
@@ -124,7 +122,7 @@ export default function SprzedazStart() {
                             <Button
                               variant={"outline"}
                               className={cn(
-                                "w-[240px] justify-start text-left font-normal",
+                                "justify-start text-left text-lg font-normal",
                                 !date && "text-muted-foreground",
                               )}
                             >
@@ -136,7 +134,7 @@ export default function SprzedazStart() {
                               )}
                             </Button>
                           </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
+                          <PopoverContent align="center" className="w-full">
                             <Calendar
                               mode="single"
                               selected={date}
@@ -154,9 +152,9 @@ export default function SprzedazStart() {
                 control={form.control}
                 name="price"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="flex flex-col items-center">
                     <FormLabel>Kwota startowa</FormLabel>
-                    <FormControl>
+                    <FormControl className="w-[100px]">
                       <Input
                         placeholder="Cena"
                         {...field}
@@ -167,13 +165,13 @@ export default function SprzedazStart() {
                       />
                     </FormControl>
                     <FormDescription>Możesz zmienić kwotę</FormDescription>
-                    {/* <FormMessage /> */}
+                    <FormMessage />
                   </FormItem>
                 )}
               />
               <Button
                 type="submit"
-                className="mx-auto w-full"
+                className="mx-auto text-lg"
                 disabled={
                   createStartMutation.isPending || !user || priceField === 0
                 }
@@ -182,8 +180,8 @@ export default function SprzedazStart() {
               </Button>
             </form>
           </Form>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

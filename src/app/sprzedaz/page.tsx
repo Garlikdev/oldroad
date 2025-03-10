@@ -19,7 +19,7 @@ const menu = [
 
 export default function Sale() {
   return (
-    <main className="relative flex flex-col items-center gap-4 overflow-hidden">
+    <main className="relative flex flex-col items-center gap-4">
       <Card className="relative">
         <CardHeader className="text-center">
           <CardTitle>Sprzedaż</CardTitle>

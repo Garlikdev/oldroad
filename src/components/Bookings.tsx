@@ -6,6 +6,15 @@ import { getAllBookings, getAllStarts } from "@/lib/actions/service.action";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Pencil2Icon } from "@radix-ui/react-icons";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export default function AllBookingsComponent({
   userId,
@@ -53,18 +62,15 @@ export default function AllBookingsComponent({
   );
 
   return (
-    <div className="flex flex-col items-center gap-4 py-4">
+    <div className="flex w-full flex-col items-center gap-4 py-4">
       {starts?.length ? (
         <div className="flex flex-col">
           {starts?.map((start) => (
             <div
               key={start.id}
-              className={`flex gap-1 ${start?.price ? "bg-green-300 dark:bg-green-700" : "bg-gred-500"} rounded-lg px-2 py-1`}
+              className={`flex gap-1 ${start?.price ? "bg-green-300 dark:bg-green-700" : "bg-gred-500"} rounded-lg px-4 py-2`}
             >
-              <div className="flex justify-end">
-                <p>Startowy:</p>
-              </div>
-              <div className="flex justify-end">{start.price}zł</div>
+              <p>Startowy: {start.price}zł</p>
             </div>
           ))}
         </div>
@@ -74,31 +80,41 @@ export default function AllBookingsComponent({
         </p>
       )}
       {bookings?.length ? (
-        <div className="flex flex-col">
-          <div className="flex w-full items-center justify-center">
+        <div className="flex w-full flex-col items-center">
+          <div className="bg-secondary mb-4 w-fit rounded-lg px-4 py-2">
             <p>Suma usług: {totalPrice}zł</p>
           </div>
-          {bookings?.map((booking) => (
-            <div
-              key={booking.id}
-              className="grid grid-cols-5 items-center gap-2 border-b py-1 text-xs last:border-none sm:gap-3 sm:text-sm md:gap-4"
-            >
-              <div className="flex flex-col">
-                <p>{moment(booking.createdAt).format("DD-MM-YY")}</p>
-                <p>{moment(booking.createdAt).format("HH:mm")}</p>
-              </div>
-              <div>{booking.user?.name}</div>
-              <div>{booking.service?.name}</div>
-              <div className="flex justify-end">{booking.price}zł</div>
-              <div className="flex justify-end">
-                <Link href={`/historia/usluga/${booking.id}`}>
-                  <Button className="px-2">
-                    <Pencil2Icon />
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          ))}
+          <Table className="w-full text-lg">
+            <TableHeader>
+              <TableRow>
+                <TableHead className="text-center">Data</TableHead>
+                <TableHead className="text-center">Frygacz</TableHead>
+                <TableHead className="text-center">Usługa</TableHead>
+                <TableHead className="text-center">Kwota</TableHead>
+                <TableHead className="text-right">Edytuj</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {bookings?.map((booking) => (
+                <TableRow key={booking.id}>
+                  <TableCell className="flex flex-col">
+                    <p>{moment(booking.createdAt).format("DD-MM-YY")}</p>
+                    <p>{moment(booking.createdAt).format("HH:mm")}</p>
+                  </TableCell>
+                  <TableCell>{booking.user?.name}</TableCell>
+                  <TableCell>{booking.service?.name}</TableCell>
+                  <TableCell>{booking.price}zł</TableCell>
+                  <TableCell>
+                    <Link href={`/historia/usluga/${booking.id}`}>
+                      <Button className="px-2">
+                        <Pencil2Icon />
+                      </Button>
+                    </Link>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       ) : (
         <p>Brak danych</p>

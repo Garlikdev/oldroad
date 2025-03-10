@@ -39,7 +39,7 @@ export default function AllBookingsPage() {
     <main className="relative flex min-h-screen w-full flex-col items-center gap-4 overflow-hidden py-4">
       <div className="container flex gap-4 px-1 sm:px-2">
         <div className="z-10 flex w-full flex-col items-center gap-4">
-          <Card className="relative z-10 w-full bg-background/80 sm:w-fit">
+          <Card className="bg-background/80 relative z-10 w-full sm:w-fit">
             <CardHeader className="text-center">
               <CardTitle className="mx-auto flex items-center gap-4">
                 <p>Historia usług</p>
@@ -71,7 +71,7 @@ export default function AllBookingsPage() {
                         )}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
+                    <PopoverContent align="center" className="w-full">
                       <Calendar
                         mode="single"
                         selected={date}

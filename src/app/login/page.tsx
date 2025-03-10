@@ -93,51 +93,45 @@ export default function Login() {
   }, [setFocus]);
 
   return (
-    <main className="relative flex min-h-screen w-full flex-col items-center gap-4 overflow-hidden py-4">
-      <div className="container flex gap-4 px-1 sm:px-2">
-        <div className="z-10 flex w-full flex-col items-center gap-4">
-          <Card className="bg-background/80 relative z-10 w-full sm:w-fit">
-            <CardHeader className="text-center">
-              <CardTitle>Logowanie</CardTitle>
-            </CardHeader>
-            <CardContent className="flex items-center gap-4">
-              <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className="flex w-full flex-col items-center space-y-6"
-                >
-                  <FormField
-                    control={form.control}
-                    name="pin"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col items-center gap-8">
-                        <FormControl>
-                          <InputOTP
-                            maxLength={4}
-                            {...field}
-                            pattern={REGEXP_ONLY_DIGITS}
-                          >
-                            <InputOTPGroup>
-                              <InputOTPSlot index={0} />
-                              <InputOTPSlot index={1} />
-                              <InputOTPSlot index={2} />
-                              <InputOTPSlot index={3} />
-                            </InputOTPGroup>
-                          </InputOTP>
-                        </FormControl>
-                        <FormDescription>Wprowadź pin.</FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+    <div className="flex w-full flex-col items-center gap-4">
+      <div className="w-full space-y-4 text-center sm:w-fit">
+        <h1>Logowanie</h1>
+        <div className="flex items-center gap-4">
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="flex w-full flex-col items-center space-y-6"
+            >
+              <FormField
+                control={form.control}
+                name="pin"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col items-center gap-8">
+                    <FormControl>
+                      <InputOTP
+                        maxLength={4}
+                        {...field}
+                        pattern={REGEXP_ONLY_DIGITS}
+                      >
+                        <InputOTPGroup>
+                          <InputOTPSlot index={0} />
+                          <InputOTPSlot index={1} />
+                          <InputOTPSlot index={2} />
+                          <InputOTPSlot index={3} />
+                        </InputOTPGroup>
+                      </InputOTP>
+                    </FormControl>
+                    <FormDescription>Wprowadź pin.</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-                  <Button type="submit">Zaloguj</Button>
-                </form>
-              </Form>
-            </CardContent>
-          </Card>
+              <Button type="submit">Zaloguj</Button>
+            </form>
+          </Form>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

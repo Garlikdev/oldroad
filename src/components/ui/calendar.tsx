@@ -18,12 +18,12 @@ function Calendar({
     <DayPicker
       locale={pl}
       showOutsideDays={showOutsideDays}
-      className={cn("p-3", className)}
+      className={cn("", className)}
       classNames={{
         months: "flex flex-col gap-2",
-        month: "flex flex-col gap-4 items-center pt-1",
+        month: "flex flex-col gap-4 items-center",
         caption: "flex justify-center pt-1 relative items-center w-full",
-        caption_label: "text-sm font-medium",
+        caption_label: "text-xl font-medium",
         nav: "flex items-center justify-between w-full px-4 absolute top-4 left-0",
         button_previous: cn(
           buttonVariants({ variant: "outline" }),
@@ -36,11 +36,11 @@ function Calendar({
         table: "w-full border-collapse space-x-1",
         weekdays: "flex",
         weekday:
-          "text-muted-foreground rounded-md w-8 font-normal text-[0.8rem]",
+          "text-muted-foreground rounded-md w-12 font-normal text-[0.8rem]",
         week: "flex w-full mt-2",
         day: cn(
           buttonVariants({ variant: "ghost" }),
-          "size-8 p-0 font-normal aria-selected:opacity-100 relative focus-within:relative focus-within:z-20",
+          "size-12 p-2 font-normal text-xl aria-selected:opacity-100 relative focus-within:relative focus-within:z-20",
           props.mode === "range"
             ? "[&:has(>.range-end)]:rounded-r-md [&:has(>.range-start)]:rounded-l-md first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md"
             : "[&:has([aria-selected])]:rounded-md",

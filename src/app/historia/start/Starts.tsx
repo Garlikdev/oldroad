@@ -38,7 +38,7 @@ export default function AllStartsComponent({
           {starts?.map((start) => (
             <div
               key={start.id}
-              className="grid grid-cols-2 items-center gap-2 border-b py-1 text-xs last:border-none sm:gap-3 sm:text-sm md:gap-4"
+              className="grid grid-cols-2 items-center gap-2 border-b py-1 text-lg last:border-none sm:gap-3 sm:text-sm md:gap-4"
             >
               <div className="flex flex-col">
                 <p>
