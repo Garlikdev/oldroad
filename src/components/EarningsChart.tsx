@@ -1,10 +1,9 @@
-// components/EarningsChart.tsx
 "use client";
 
 import { useUserStore } from "@/lib/hooks/userStore";
 import { useQuery } from "@tanstack/react-query";
 import moment from "moment-timezone";
-import "moment/locale/pl"; // Import Polish locale
+import "moment/locale/pl";
 import {
   Bar,
   BarChart,
@@ -12,16 +11,7 @@ import {
   ResponsiveContainer,
   Tooltip,
   XAxis,
-  YAxis,
 } from "recharts";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "./ui/card";
 import {
   Select,
   SelectContent,
@@ -29,7 +19,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { TrendingUp } from "lucide-react";
 import { useMemo, useState } from "react";
 import { getAllBookingsChart } from "@/lib/actions/service.action";
 import { Skeleton } from "./ui/skeleton";
@@ -126,7 +115,6 @@ export function EarningsChart() {
                       : moment(date).format("MMM 'YY")
                   }
                 />
-                {/* <YAxis tickFormatter={(value) => `${value} zł`} width={100} /> */}
                 <Tooltip
                   content={({ payload }) => {
                     if (!payload || payload.length === 0) return null;

@@ -1,5 +1,3 @@
-"use client";
-
 import { EarningsChart } from "@/components/EarningsChart";
 
 export default function HomePage() {
