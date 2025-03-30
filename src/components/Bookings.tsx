@@ -9,7 +9,6 @@ import { Pencil2Icon } from "@radix-ui/react-icons";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,

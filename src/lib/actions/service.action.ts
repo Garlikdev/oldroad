@@ -60,6 +60,65 @@ export async function getUser(pin: string) {
 
 // Usługi
 
+export async function getTodaySumBookings() {
+  const timezone = "Europe/Warsaw"; // GMT+2
+  const date = new Date();
+  const today = moment(date).format("YYYY-MM-DD");
+
+  const filterDate = today
+    ? moment.tz(today, timezone).startOf("day")
+    : moment.tz(timezone).startOf("day");
+
+  const endDate = moment(filterDate).endOf("day");
+
+  const bookings = await prisma.booking.findMany({
+    where: {
+      createdAt: {
+        gte: filterDate.toDate(),
+        lt: endDate.toDate(),
+      },
+    },
+    select: {
+      price: true,
+    },
+  });
+
+  const totalSumBookings = bookings.reduce(
+    (sum, booking) => sum + booking.price,
+    0,
+  );
+
+  return totalSumBookings;
+}
+
+export async function getTodayStart() {
+  const timezone = "Europe/Warsaw"; // GMT+2
+  const date = new Date();
+  const today = moment(date).format("YYYY-MM-DD");
+
+  const filterDate = today
+    ? moment.tz(today, timezone).startOf("day")
+    : moment.tz(timezone).startOf("day");
+
+  const endDate = moment(filterDate).endOf("day");
+  const start = await prisma.start.findFirst({
+    where: {
+      createdAt: {
+        gte: filterDate.toDate(),
+        lt: endDate.toDate(),
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    select: {
+      price: true,
+    },
+  });
+  const startPrice = start ? start.price : 0;
+  return startPrice;
+}
+
 export async function getAllBookings(userId: number, date?: string) {
   const timezone = "Europe/Warsaw"; // GMT+2
 

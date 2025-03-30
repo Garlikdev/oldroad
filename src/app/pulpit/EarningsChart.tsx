@@ -18,10 +18,10 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./ui/select";
+} from "../../components/ui/select";
 import { useMemo, useState } from "react";
 import { getAllBookingsChart } from "@/lib/actions/service.action";
-import { Skeleton } from "./ui/skeleton";
+import { Skeleton } from "../../components/ui/skeleton";
 
 const timezone = "Europe/Warsaw";
 
@@ -85,11 +85,9 @@ export function EarningsChart() {
   return (
     <div className="flex w-full flex-col">
       <div className="flex w-full items-center justify-between">
-        <h1>
-          {user?.id === 3 ? "Rozliczenie usług" : "Twoje rozliczenie usług"}
-        </h1>
+        <h1>{user?.id === 3 ? "Historia" : "Twoja historia"}</h1>
         <Select value={viewMode} onValueChange={(v) => setViewMode(v as any)}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-[100px]">
             <SelectValue placeholder="View mode" />
           </SelectTrigger>
           <SelectContent>
