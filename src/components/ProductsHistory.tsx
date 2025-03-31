@@ -48,7 +48,7 @@ export default function ProductsHistory({
     isLoading: isLoadingStarts,
     isError: isStartsError,
   } = useQuery({
-    queryKey: ["start", date ? moment(date).format("YYYY-MM-DD") : ""],
+    queryKey: ["start-history", date ? moment(date).format("YYYY-MM-DD") : ""],
     queryFn: async () =>
       date
         ? await getAllStarts(moment(date).format("YYYY-MM-DD"))

@@ -96,6 +96,37 @@ export async function getTodaySumBookings() {
   return totalSumBookings;
 }
 
+export async function getTodaySumProducts() {
+  const timezone = "Europe/Warsaw"; // GMT+2
+  const date = new Date();
+  const today = moment(date).format("YYYY-MM-DD");
+
+  const filterDate = today
+    ? moment.tz(today, timezone).startOf("day")
+    : moment.tz(timezone).startOf("day");
+
+  const endDate = moment(filterDate).endOf("day");
+
+  const products = await prisma.product.findMany({
+    where: {
+      createdAt: {
+        gte: filterDate.toDate(),
+        lt: endDate.toDate(),
+      },
+    },
+    select: {
+      price: true,
+    },
+  });
+
+  const totalSumProducts = products.reduce(
+    (sum, product) => sum + product.price,
+    0,
+  );
+
+  return totalSumProducts;
+}
+
 export async function getTodayStart() {
   const timezone = "Europe/Warsaw"; // GMT+2
   const date = new Date();

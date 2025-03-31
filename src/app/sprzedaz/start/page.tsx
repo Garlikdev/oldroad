@@ -66,7 +66,7 @@ export default function SprzedazStart() {
         duration: 4000,
       });
       await queryClient.invalidateQueries({
-        queryKey: ["start"],
+        queryKey: ["start-history", "start-today"],
       });
     },
     onError: () => {

@@ -15,7 +15,7 @@ export default function AllStartsComponent({
     isLoading: isLoadingStarts,
     isError,
   } = useQuery({
-    queryKey: ["start", date ? moment(date).format("YYYY-MM-DD") : ""],
+    queryKey: ["start-history", date ? moment(date).format("YYYY-MM-DD") : ""],
     queryFn: async () =>
       date
         ? await getAllStarts(moment(date).format("YYYY-MM-DD"))

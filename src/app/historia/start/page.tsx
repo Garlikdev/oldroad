@@ -28,7 +28,7 @@ export default function StartHistoryPage() {
     setDate(date);
     if (date) {
       await queryClient.invalidateQueries({
-        queryKey: ["start"],
+        queryKey: ["start-history", "start-today"],
       });
     }
   };
