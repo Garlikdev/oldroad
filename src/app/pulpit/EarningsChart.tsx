@@ -87,12 +87,12 @@ export function EarningsChart() {
       <div className="flex w-full items-center justify-between">
         <h1>{user?.id === 3 ? "Historia" : "Twoja historia"}</h1>
         <Select value={viewMode} onValueChange={(v) => setViewMode(v as any)}>
-          <SelectTrigger className="w-[100px]">
+          <SelectTrigger className="w-[140px]">
             <SelectValue placeholder="View mode" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="daily">Ostatnie 7 dni</SelectItem>
-            <SelectItem value="monthly">Ostatnie 6 miesięcy</SelectItem>
+            <SelectItem value="daily">7 dni</SelectItem>
+            <SelectItem value="monthly">6 miesięcy</SelectItem>
           </SelectContent>
         </Select>
       </div>
