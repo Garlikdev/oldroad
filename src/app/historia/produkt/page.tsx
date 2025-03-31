@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import { format } from "date-fns";
 import { pl } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
-import AllBookingsComponent from "@/components/Bookings";
 import {
   Popover,
   PopoverContent,
@@ -15,6 +14,7 @@ import { CalendarIcon } from "@radix-ui/react-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { Calendar } from "@/components/ui/calendar";
 import { useUserStore } from "@/lib/hooks/userStore";
+import ProductsHistory from "@/components/ProductsHistory";
 
 export default function BookingsHistory() {
   const user = useUserStore((state) => state.user);
@@ -28,7 +28,7 @@ export default function BookingsHistory() {
     setDate(date);
     if (date) {
       await queryClient.invalidateQueries({
-        queryKey: ["bookings-history", "bookings-today"],
+        queryKey: ["products-by-user", "products-history"],
       });
     }
   };
@@ -36,7 +36,7 @@ export default function BookingsHistory() {
   return (
     <div className="flex w-full flex-col items-center gap-4">
       <div className="w-full space-y-4 text-center sm:w-fit">
-        <h1>Historia usług</h1>
+        <h1>Historia produktów</h1>
         <div className="flex flex-col items-center">
           {user && (
             <div className="flex flex-col items-center">
@@ -65,7 +65,7 @@ export default function BookingsHistory() {
                   />
                 </PopoverContent>
               </Popover>
-              <AllBookingsComponent userId={user.id} date={date} />
+              <ProductsHistory userId={user.id} date={date} />
             </div>
           )}
         </div>

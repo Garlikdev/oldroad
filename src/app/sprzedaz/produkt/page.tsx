@@ -17,18 +17,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  createBooking,
-  getUserServicePrice,
-  getUserServices,
-} from "@/lib/actions/service.action";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { createProduct } from "@/lib/actions/service.action";
 import { Input } from "@/components/ui/input";
 import {
   Form,
@@ -39,19 +28,21 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import AllBookingsComponent from "@/components/Bookings";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
 import { Separator } from "@/components/ui/separator";
+import ProductsHistory from "@/components/ProductsHistory";
 
 const schema = z.object({
-  userId: z.number().positive({ message: "User ID" }),
+  userId: z.number().positive({ message: "Id użytkownika" }),
   createdAt: z.date(),
-  serviceId: z.number().positive({ message: "Service ID" }),
-  price: z.number().positive({ message: "Price" }),
+  name: z.string().min(1, {
+    message: "Nazwa jest wymagana",
+  }),
+  price: z.number().positive({ message: "Cena jest wymagana" }),
 });
 
-type BookingFormValues = z.infer<typeof schema>;
+type ProductFormValues = z.infer<typeof schema>;
 
 export default function AddService() {
   const queryClient = useQueryClient();
@@ -60,78 +51,50 @@ export default function AddService() {
   const [historyDate, setHistoryDate] = useState<Date | undefined>(new Date());
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [isHistoryCalendarOpen, setIsHistoryCalendarOpen] = useState(false);
-  const [serviceId, setServiceId] = useState<number | undefined>(undefined);
+  const [name, setName] = useState<string | undefined>();
 
   const user = useUserStore((state) => state.user);
-
-  const { data: services, isLoading: isLoadingServices } = useQuery({
-    queryKey: ["services", user?.id],
-    queryFn: async () => {
-      if (user?.id) {
-        return await getUserServices(user.id);
-      }
-      return [];
-    },
-    enabled: !!user?.id,
-  });
 
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: {
       userId: user?.id || 0,
-      serviceId: undefined,
+      name: "",
       price: undefined,
       createdAt: new Date(),
     },
   });
 
   const priceField = form.watch("price"); // Watch the price field
+  const nameField = form.watch("name"); // Watch the name field
 
-  const {
-    data: price,
-    refetch: refetchPrice,
-    isLoading: isLoadingPrice,
-  } = useQuery({
-    queryKey: ["user-service-price", user?.id, serviceId],
-    queryFn: async () => {
-      if (user?.id && serviceId) {
-        const price = await getUserServicePrice(user?.id, serviceId);
-        form.setValue("price", price ?? 0);
-        return price;
-      }
-      return 0;
-    },
-    refetchOnWindowFocus: false,
-    enabled: !!serviceId && !!user?.id,
-  });
-
-  const createBookingMutation = useMutation({
-    mutationKey: ["createBooking"],
-    mutationFn: async (data: BookingFormValues) => {
-      await createBooking(data);
+  const createProductMutation = useMutation({
+    mutationKey: ["createProduct"],
+    mutationFn: async (data: ProductFormValues) => {
+      await createProduct(data);
     },
     onSuccess: async () => {
       toast.success("Sukces", {
-        description: `Wykonanie usługi dodane!`,
+        description: `Sprzedaż produktu dodana!`,
         className: "bg-green-400 dark:bg-green-700",
         duration: 4000,
       });
       await queryClient.invalidateQueries({
-        queryKey: ["bookings-history", "bookings-today"],
+        queryKey: ["products-history", "products-by-user"],
       });
-      form.setValue("serviceId", -1);
+      form.setValue("name", "");
       form.setValue("price", 0);
     },
     onError: () => {
       toast.error("Błąd", {
-        description: "Nie udało się zapisać wykonanej usługi",
+        description: "Nie udało się zapisać sprzedaży produktu",
         duration: 4000,
       });
     },
   });
 
   function onSubmit(data: z.infer<typeof schema>) {
-    createBookingMutation.mutate(data);
+    createProductMutation.mutate(data);
   }
 
   const handleDateChange = (date: Date | undefined) => {
@@ -145,24 +108,6 @@ export default function AddService() {
     setHistoryDate(date);
   };
 
-  const handleServiceChange = (value: string) => {
-    form.setValue("serviceId", parseInt(value));
-    setServiceId(parseInt(value));
-  };
-
-  useEffect(() => {
-    async function fetchPrice() {
-      try {
-        if (user?.id && serviceId) {
-          await refetchPrice();
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    fetchPrice().catch(console.error);
-  }, [user, serviceId, refetchPrice]);
-
   useEffect(() => {
     form.setValue("createdAt", date ?? new Date());
   }, [date, form]);
@@ -170,7 +115,7 @@ export default function AddService() {
   return (
     <div className="flex w-full flex-col items-center gap-4">
       <div className="space-y-6">
-        <h1>Sprzedaż usługa</h1>
+        <h1>Sprzedaż produktu</h1>
         <div className="flex flex-col">
           <Form {...form}>
             <form
@@ -247,42 +192,18 @@ export default function AddService() {
                 )}
               />
               <FormField
-                name="serviceId"
+                name="name"
                 control={form.control}
                 render={({ field }) => (
                   <FormItem className="flex flex-col items-center">
-                    <FormLabel className="text-base">Usługa</FormLabel>
-                    <Select
-                      value={field.value ? field.value.toString() : ""}
-                      name={field.name}
-                      onValueChange={handleServiceChange}
-                    >
-                      <FormControl className="w-full">
-                        <SelectTrigger className="h-12 text-base">
-                          <SelectValue
-                            onBlur={field.onBlur}
-                            ref={field.ref}
-                            placeholder="Wybierz usługę"
-                          />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent align="center">
-                        {services ? (
-                          <div>
-                            {services?.map((service) => (
-                              <SelectItem
-                                key={service.id}
-                                value={service.id.toString()}
-                              >
-                                {service.name}
-                              </SelectItem>
-                            ))}
-                          </div>
-                        ) : (
-                          <p>Brak danych</p>
-                        )}
-                      </SelectContent>
-                    </Select>
+                    <FormLabel className="text-base">Produkt</FormLabel>
+                    <FormControl className="h-12 max-w-[200px] text-base">
+                      <Input
+                        placeholder="Nazwa"
+                        {...field}
+                        value={field.value ?? ""}
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -301,12 +222,7 @@ export default function AddService() {
                         onChange={(e) =>
                           field.onChange(parseInt(e.target.value) || "")
                         }
-                        disabled={
-                          createBookingMutation.isPending ||
-                          isLoadingPrice ||
-                          isLoadingServices ||
-                          !price
-                        }
+                        disabled={!nameField}
                       />
                     </FormControl>
                     <FormDescription>Możesz zmienić cenę</FormDescription>
@@ -318,14 +234,10 @@ export default function AddService() {
                 type="submit"
                 className="h-12 w-full text-base"
                 disabled={
-                  createBookingMutation.isPending ||
-                  isLoadingPrice ||
-                  isLoadingServices ||
-                  !price ||
-                  !priceField
+                  createProductMutation.isPending || !priceField || !nameField
                 }
               >
-                {createBookingMutation.isPending ? (
+                {createProductMutation.isPending ? (
                   <div className="flex items-center gap-2">
                     <Spinner size="small" />
                     Dodawanie...
@@ -341,7 +253,7 @@ export default function AddService() {
       <Separator />
       {/* Historia  */}
       <div className="w-full space-y-4 text-center sm:w-fit">
-        <h1>Historia usług</h1>
+        <h1>Historia produktów</h1>
         <div className="flex flex-col items-center">
           {user && (
             <div className="flex flex-col items-center">
@@ -373,9 +285,7 @@ export default function AddService() {
                   />
                 </PopoverContent>
               </Popover>
-              {user && (
-                <AllBookingsComponent userId={user.id} date={historyDate} />
-              )}
+              {user && <ProductsHistory userId={user.id} date={historyDate} />}
             </div>
           )}
         </div>

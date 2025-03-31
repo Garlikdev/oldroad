@@ -21,10 +21,6 @@ export type BookingChartData = {
   createdAt: Date;
 };
 
-export async function getServices() {
-  return prisma.service.findMany();
-}
-
 export async function getUserServices(userId: number) {
   const services = await prisma.service.findMany({
     where: {
@@ -36,6 +32,15 @@ export async function getUserServices(userId: number) {
     },
   });
   return services;
+}
+
+export async function getUserProducts(userId: number) {
+  const products = await prisma.product.findMany({
+    where: {
+      userId,
+    },
+  });
+  return products;
 }
 
 // Users
@@ -162,6 +167,47 @@ export async function getAllBookings(userId: number, date?: string) {
 
   return bookings;
 }
+export async function getAllProducts(userId: number, date?: string) {
+  const timezone = "Europe/Warsaw"; // GMT+2
+
+  const filterDate = date
+    ? moment.tz(date, timezone).startOf("day")
+    : moment.tz(timezone).startOf("day");
+
+  const endDate = moment(filterDate).endOf("day");
+
+  let products;
+  if (userId === 3) {
+    products = await prisma.product.findMany({
+      where: {
+        createdAt: {
+          gte: filterDate.toDate(),
+          lt: endDate.toDate(),
+        },
+      },
+      orderBy: { createdAt: "desc" },
+      include: {
+        user: true,
+      },
+    });
+  } else {
+    products = await prisma.product.findMany({
+      where: {
+        userId,
+        createdAt: {
+          gte: filterDate.toDate(),
+          lt: endDate.toDate(),
+        },
+      },
+      orderBy: { createdAt: "desc" },
+      include: {
+        user: true,
+      },
+    });
+  }
+
+  return products;
+}
 
 export async function getAllBookingsChart(
   userId: number,
@@ -263,6 +309,31 @@ export async function createBooking(data: {
     });
 
     return newBooking;
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
+}
+
+export async function createProduct(data: {
+  userId: number;
+  name: string;
+  createdAt: Date;
+  price: number;
+}) {
+  try {
+    const { userId, name, price, createdAt } = data;
+
+    const newProduct = await prisma.product.create({
+      data: {
+        userId,
+        createdAt,
+        name,
+        price,
+      },
+    });
+
+    return newProduct;
   } catch (err) {
     console.error(err);
     return null;

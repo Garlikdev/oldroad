@@ -120,16 +120,7 @@ const EditBooking = ({ bookingId }: { bookingId: string }) => {
         duration: 1000,
       });
       await queryClient.invalidateQueries({
-        queryKey: ["bookings"],
-      });
-      await queryClient.invalidateQueries({
-        queryKey: ["bookings-by-user"],
-      });
-      await queryClient.invalidateQueries({
-        queryKey: ["bookings-all"],
-      });
-      await queryClient.invalidateQueries({
-        queryKey: ["getBookingById"],
+        queryKey: ["bookings-history", "bookings-today", "getBookingById"],
       });
       router.push("/");
     },
