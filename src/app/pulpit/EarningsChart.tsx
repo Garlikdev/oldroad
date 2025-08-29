@@ -86,7 +86,7 @@ export function EarningsChart() {
     <div className="flex w-full flex-col">
       <div className="flex w-full items-center justify-between">
         <h1>{session?.user?.role === 'ADMIN' ? "Historia" : "Twoja historia"}</h1>
-        <Select value={viewMode} onValueChange={(v) => setViewMode(v as any)}>
+        <Select value={viewMode} onValueChange={(v) => setViewMode(v as "daily" | "monthly")}>
           <SelectTrigger className="w-[140px]">
             <SelectValue placeholder="View mode" />
           </SelectTrigger>

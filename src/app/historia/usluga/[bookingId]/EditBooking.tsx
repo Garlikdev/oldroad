@@ -6,7 +6,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { pl } from "date-fns/locale";
-import { cn } from "@/lib/utils";
+import { cn, getCurrentDateInPoland } from "@/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   editBooking,
@@ -54,7 +54,7 @@ const schema = z.object({
 type BookingFormValues = z.infer<typeof schema>;
 
 const EditBooking = ({ bookingId }: { bookingId: string }) => {
-  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [date, setDate] = useState<Date | undefined>(getCurrentDateInPoland());
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [serviceId, setServiceId] = useState<number | undefined>(undefined);
   const router = useRouter();
@@ -68,8 +68,8 @@ const EditBooking = ({ bookingId }: { bookingId: string }) => {
         const booking = await getBookingById(parseInt(bookingId));
         setServiceId(booking?.service.id ?? 0);
         form.setValue("serviceId", booking?.service.id ?? 0);
-        form.setValue("createdAt", booking?.createdAt ?? new Date());
-        setDate(booking?.createdAt ?? new Date());
+        form.setValue("createdAt", booking?.createdAt ?? getCurrentDateInPoland());
+        setDate(booking?.createdAt ?? getCurrentDateInPoland());
         form.setValue("price", booking?.price ?? 0);
         return booking;
       }
@@ -86,7 +86,7 @@ const EditBooking = ({ bookingId }: { bookingId: string }) => {
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: {
-      createdAt: booking?.createdAt ? new Date(booking.createdAt) : new Date(),
+      createdAt: booking?.createdAt ? new Date(booking.createdAt) : getCurrentDateInPoland(),
       serviceId: booking?.service.id,
       price: booking?.price,
     },
@@ -141,7 +141,7 @@ const EditBooking = ({ bookingId }: { bookingId: string }) => {
   const handleDateChange = (date: Date | undefined) => {
     setIsCalendarOpen(false);
     setDate(date);
-    form.setValue("createdAt", date ?? new Date());
+    form.setValue("createdAt", date ?? getCurrentDateInPoland());
   };
 
   function onSubmit(data: z.infer<typeof schema>) {

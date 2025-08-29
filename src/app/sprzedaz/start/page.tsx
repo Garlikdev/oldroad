@@ -9,7 +9,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
+import { cn, getCurrentDateInPoland } from "@/lib/utils";
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { Calendar } from "@/components/ui/calendar";
 import { useSession } from "next-auth/react";
@@ -43,12 +43,11 @@ export default function SprzedazStart() {
   const queryClient = useQueryClient();
   const priceInputRef = useRef<HTMLInputElement>(null);
 
-  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [date, setDate] = useState<Date | undefined>(getCurrentDateInPoland());
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   const { data: session } = useSession();
   const user = session?.user;
-  const userId = user?.id ? parseInt(user.id) : undefined;
 
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
@@ -89,11 +88,11 @@ export default function SprzedazStart() {
   const handleDateChange = (date: Date | undefined) => {
     setIsCalendarOpen(false);
     setDate(date);
-    form.setValue("createdAt", date ?? new Date());
+    form.setValue("createdAt", date ?? getCurrentDateInPoland());
   };
 
   useEffect(() => {
-    form.setValue("createdAt", date ?? new Date());
+    form.setValue("createdAt", date ?? getCurrentDateInPoland());
   }, [date, form]);
 
   // Auto-focus on price input when component mounts

@@ -2,10 +2,15 @@
   "name": "oldroadpos",
   "version": "0.0.1",
   "private": true,
+  "type": "module",
   "scripts": {
     "build": "next build",
     "dev": "next dev --turbopack",
-    "lint": "next lint",
+    "lint": "eslint . --ext .ts,.tsx",
+    "lint:check": "eslint . --ext .ts,.tsx --max-warnings 0",
+    "lint:fix": "eslint . --ext .ts,.tsx --fix",
+    "lint:unused": "eslint . --ext .ts,.tsx --no-error-on-unmatched-pattern --rule '@typescript-eslint/no-unused-vars: error' --rule 'unused-imports/no-unused-imports: error'",
+    "lint:all": "npm run lint && npm run lint:unused",
     "start": "next start",
     "postinstall": "prisma generate"
   },
@@ -55,6 +60,9 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
+    "@eslint/js": "^9.34.0",
+    "@next/eslint-plugin-next": "^15.5.2",
     "@tanstack/eslint-plugin-query": "^5.83.1",
     "@types/eslint": "^9.6.1",
     "@types/node": "^24.3.0",

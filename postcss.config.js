@@ -1,7 +1,7 @@
 const config = {
   plugins: {
-    '@tailwindcss/postcss': {},
+    "@tailwindcss/postcss": {},
   },
 };
 
-module.exports = config;
+export default config;

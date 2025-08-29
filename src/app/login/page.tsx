@@ -64,7 +64,7 @@ function LoginForm() {
         router.push(from);
         router.refresh();
       }
-    } catch (error) {
+    } catch {
       toast.error("Błąd", {
         description: "Wystąpił błąd podczas logowania",
         duration: 4000,

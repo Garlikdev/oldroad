@@ -11,6 +11,7 @@ import {
 } from "@tanstack/react-query";
 import BottomNav from "@/components/nav/BottomNav";
 import TopNav from "../components/nav/TopNav";
+import type { ReactNode } from "react";
 
 export const metadata = {
   title: "Old Road POS",
@@ -21,7 +22,7 @@ export const metadata = {
 export default async function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   const queryClient = new QueryClient();
 

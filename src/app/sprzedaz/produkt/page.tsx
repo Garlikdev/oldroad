@@ -9,14 +9,14 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
+import { cn, getCurrentDateInPoland } from "@/lib/utils";
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { Calendar } from "@/components/ui/calendar";
 import { useSession } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createProduct } from "@/lib/actions/service.action";
 import { Input } from "@/components/ui/input";
 import {
@@ -49,11 +49,10 @@ export default function AddService() {
   const queryClient = useQueryClient();
   const nameInputRef = useRef<HTMLInputElement>(null);
 
-  const [date, setDate] = useState<Date | undefined>(new Date());
-  const [historyDate, setHistoryDate] = useState<Date | undefined>(new Date());
+  const [date, setDate] = useState<Date | undefined>(getCurrentDateInPoland());
+  const [historyDate, setHistoryDate] = useState<Date | undefined>(getCurrentDateInPoland());
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [isHistoryCalendarOpen, setIsHistoryCalendarOpen] = useState(false);
-  const [name, setName] = useState<string | undefined>();
 
   const { data: session } = useSession();
   const user = session?.user;
@@ -104,7 +103,7 @@ export default function AddService() {
   const handleDateChange = (date: Date | undefined) => {
     setIsCalendarOpen(false);
     setDate(date);
-    form.setValue("createdAt", date ?? new Date());
+    form.setValue("createdAt", date ?? getCurrentDateInPoland());
   };
 
   const handleHistoryDateChange = (date: Date | undefined) => {
@@ -113,7 +112,7 @@ export default function AddService() {
   };
 
   useEffect(() => {
-    form.setValue("createdAt", date ?? new Date());
+    form.setValue("createdAt", date ?? getCurrentDateInPoland());
   }, [date, form]);
 
   // Auto-focus on name input when component mounts

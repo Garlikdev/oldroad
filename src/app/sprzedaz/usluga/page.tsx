@@ -9,7 +9,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
+import { cn, getCurrentDateInPoland } from "@/lib/utils";
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { Calendar } from "@/components/ui/calendar";
 import { useSession } from "next-auth/react";
@@ -58,8 +58,8 @@ export default function AddService() {
   const queryClient = useQueryClient();
   const serviceSelectRef = useRef<HTMLButtonElement>(null);
 
-  const [date, setDate] = useState<Date | undefined>(new Date());
-  const [historyDate, setHistoryDate] = useState<Date | undefined>(new Date());
+  const [date, setDate] = useState<Date | undefined>(getCurrentDateInPoland());
+  const [historyDate, setHistoryDate] = useState<Date | undefined>(getCurrentDateInPoland());
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [isHistoryCalendarOpen, setIsHistoryCalendarOpen] = useState(false);
   const [serviceId, setServiceId] = useState<number | undefined>(undefined);
@@ -85,7 +85,7 @@ export default function AddService() {
       userId: userId || 0,
       serviceId: undefined,
       price: undefined,
-      createdAt: new Date(),
+      createdAt: getCurrentDateInPoland(),
     },
   });
 
@@ -141,7 +141,7 @@ export default function AddService() {
   const handleDateChange = (date: Date | undefined) => {
     setIsCalendarOpen(false);
     setDate(date);
-    form.setValue("createdAt", date ?? new Date());
+    form.setValue("createdAt", date ?? getCurrentDateInPoland());
   };
 
   const handleHistoryDateChange = (date: Date | undefined) => {
@@ -168,7 +168,7 @@ export default function AddService() {
   }, [user, serviceId, refetchPrice]);
 
   useEffect(() => {
-    form.setValue("createdAt", date ?? new Date());
+    form.setValue("createdAt", date ?? getCurrentDateInPoland());
   }, [date, form]);
 
   // Auto-focus on service select when component mounts

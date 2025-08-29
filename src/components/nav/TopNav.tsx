@@ -5,11 +5,12 @@ import { ModeToggle } from "../theme/ModeToggle";
 import { useSession } from "next-auth/react";
 import { format } from "date-fns";
 import { pl } from "date-fns/locale";
+import { getCurrentDateInPoland } from "@/lib/utils";
 import { BarChart3, CalendarDays, User } from "lucide-react";
 
 export default function TopNav() {
   const { data: session } = useSession();
-  const currentDate = format(new Date(), "EEEE, d MMMM yyyy", { locale: pl });
+  const currentDate = format(getCurrentDateInPoland(), "EEEE, d MMMM yyyy", { locale: pl });
   const userName = session?.user?.name || "Barber";
 
   return (

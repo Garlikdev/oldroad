@@ -1,7 +1,7 @@
 "use server";
 
 import prisma from "@/lib/db";
-import { Prisma } from "@prisma/client";
+import { type Prisma } from "@prisma/client";
 import moment from "moment-timezone";
 
 type UserServicePrice = {
@@ -136,7 +136,7 @@ export async function getTodaySumProducts(userId?: number) {
   return totalSumProducts;
 }
 
-export async function getTodayStart(userId?: number) {
+export async function getTodayStart(_userId?: number) {
   const timezone = "Europe/Warsaw"; // GMT+2
   const date = new Date();
   const today = moment(date).format("YYYY-MM-DD");
@@ -438,7 +438,7 @@ export async function getUserServicePrice(userId: number, serviceId: number) {
       });
 
     return userServicePrice ? userServicePrice.price : null;
-  } catch (error) {
+  } catch {
     console.error("Brak ustalonej ceny usługi");
     return null;
   }

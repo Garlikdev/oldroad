@@ -1,5 +1,5 @@
 import * as React from "react";
-import { cn } from "@/lib/utils";
+import { cn, getCurrentDateInPoland } from "@/lib/utils";
 import { buttonVariants } from "./ui/button";
 import { ArrowLeftIcon, ArrowRightIcon } from "@radix-ui/react-icons";
 
@@ -106,10 +106,10 @@ function MonthCal({
   onYearForward,
 }: MonthCalProps) {
   const [year, setYear] = React.useState<number>(
-    selectedMonth?.getFullYear() ?? new Date().getFullYear(),
+    selectedMonth?.getFullYear() ?? getCurrentDateInPoland().getFullYear(),
   );
   const [month, setMonth] = React.useState<number>(
-    selectedMonth?.getMonth() ?? new Date().getMonth(),
+    selectedMonth?.getMonth() ?? getCurrentDateInPoland().getMonth(),
   );
   const [menuYear, setMenuYear] = React.useState<number>(year);
 

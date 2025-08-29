@@ -7,13 +7,14 @@ import DatePicker from "@/components/DatePicker";
 import { ShoppingCart, Package } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useSession } from "next-auth/react";
+import { getCurrentDateInPoland } from "@/lib/utils";
 import ProductsHistory from "@/components/ProductsHistory";
 
 export default function BookingsHistory() {
   const { data: session } = useSession();
   const user = session?.user;
   const userId = user?.id ? parseInt(user.id) : undefined;
-  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [date, setDate] = useState<Date | undefined>(getCurrentDateInPoland());
 
   const handleDateChange = (selectedDate: Date | undefined) => {
     setDate(selectedDate);

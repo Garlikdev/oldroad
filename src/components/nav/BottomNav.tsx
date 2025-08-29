@@ -10,10 +10,8 @@ import {
   Scissors,
   ShoppingCart,
   Banknote,
-  History,
   LogOut,
-  Settings,
-  Menu
+  Settings
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,7 +19,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";

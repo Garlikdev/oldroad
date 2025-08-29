@@ -13,13 +13,10 @@ import {
   Package,
   DollarSign,
   BarChart3,
-  Clock,
   Banknote,
   Scissors,
   ShoppingCart
 } from "lucide-react";
-import { format } from "date-fns";
-import { pl } from "date-fns/locale";
 import { useQuery } from "@tanstack/react-query";
 import {
   getDashboardData,
@@ -47,7 +44,6 @@ export default function HomePage() {
   // Extract data from the single query
   const userBookings = dashboardData?.userBookings || 0;
   const userProducts = dashboardData?.userProducts || 0;
-  const userStart = dashboardData?.startCash || 0;
   const userBookingCount = dashboardData?.userBookingCount || 0;
 
   // Admin data (only available if user is admin)
@@ -59,7 +55,6 @@ export default function HomePage() {
   // Loading states
   const isLoadingUserBookings = isLoadingDashboard;
   const isLoadingUserProducts = isLoadingDashboard;
-  const isLoadingUserStart = isLoadingDashboard;
   const isLoadingUserBookingCount = isLoadingDashboard;
   const isLoadingAllBookings = isLoadingDashboard;
   const isLoadingAllProducts = isLoadingDashboard;
@@ -78,7 +73,6 @@ export default function HomePage() {
     );
   }
 
-  const currentDate = format(new Date(), "EEEE, d MMMM yyyy", { locale: pl });
   const userName = session?.user?.name || "Barber";
 
   // Calculate totals for display

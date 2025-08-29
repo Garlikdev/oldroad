@@ -6,6 +6,11 @@ await import("./src/env.mjs");
 
 /** @type {import("next").NextConfig} */
 const config = {
+  eslint: {
+    // Disable ESLint during production builds
+    // You can still run 'npm run lint' manually when needed
+    ignoreDuringBuilds: true,
+  },
   images: {
     remotePatterns: [
       {

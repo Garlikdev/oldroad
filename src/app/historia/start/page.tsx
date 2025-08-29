@@ -7,12 +7,13 @@ import DatePicker from "@/components/DatePicker";
 import AllStartsComponent from "./Starts";
 import { Banknote, TrendingUp } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { getCurrentDateInPoland } from "@/lib/utils";
 import { useSession } from "next-auth/react";
 
 export default function StartHistoryPage() {
   const { data: session } = useSession();
   const user = session?.user;
-  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [date, setDate] = useState<Date | undefined>(getCurrentDateInPoland());
 
   const handleDateChange = (selectedDate: Date | undefined) => {
     setDate(selectedDate);

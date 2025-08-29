@@ -3,20 +3,19 @@
 import React, { useState } from "react";
 import { format } from "date-fns";
 import { pl } from "date-fns/locale";
-import { Button } from "@/components/ui/button";
 import AllBookingsComponent from "@/components/Bookings";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import DatePicker from "@/components/DatePicker";
 import { useSession } from "next-auth/react";
+import { getCurrentDateInPoland } from "@/lib/utils";
 import { Scissors } from "lucide-react";
 
 export default function BookingsHistory() {
   const { data: session } = useSession();
   const user = session?.user;
   const userId = user?.id ? parseInt(user.id) : undefined;
-  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [date, setDate] = useState<Date | undefined>(getCurrentDateInPoland());
 
   const handleDateChange = (selectedDate: Date | undefined) => {
     setDate(selectedDate);
