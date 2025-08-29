@@ -73,21 +73,14 @@ export async function isUserAdmin(userId: number) {
 }
 
 export async function getTodaySumBookings(userId?: number) {
-  const timezone = "Europe/Warsaw"; // GMT+2
-  const date = new Date();
-  const today = moment(date).format("YYYY-MM-DD");
-
-  const filterDate = today
-    ? moment.tz(today, timezone).startOf("day")
-    : moment.tz(timezone).startOf("day");
-
-  const endDate = moment(filterDate).endOf("day");
+  const filterDate = getStartOfTodayInPoland();
+  const endDate = getEndOfTodayInPoland();
 
   const bookings = await prisma.booking.findMany({
     where: {
       createdAt: {
-        gte: filterDate.toDate(),
-        lt: endDate.toDate(),
+        gte: filterDate,
+        lt: endDate,
       },
       ...(userId && { userId }),
     },
@@ -105,21 +98,14 @@ export async function getTodaySumBookings(userId?: number) {
 }
 
 export async function getTodaySumProducts(userId?: number) {
-  const timezone = "Europe/Warsaw"; // GMT+2
-  const date = new Date();
-  const today = moment(date).format("YYYY-MM-DD");
-
-  const filterDate = today
-    ? moment.tz(today, timezone).startOf("day")
-    : moment.tz(timezone).startOf("day");
-
-  const endDate = moment(filterDate).endOf("day");
+  const filterDate = getStartOfTodayInPoland();
+  const endDate = getEndOfTodayInPoland();
 
   const products = await prisma.product.findMany({
     where: {
       createdAt: {
-        gte: filterDate.toDate(),
-        lt: endDate.toDate(),
+        gte: filterDate,
+        lt: endDate,
       },
       ...(userId && { userId }),
     },
@@ -137,21 +123,14 @@ export async function getTodaySumProducts(userId?: number) {
 }
 
 export async function getTodayStart(_userId?: number) {
-  const timezone = "Europe/Warsaw"; // GMT+2
-  const date = new Date();
-  const today = moment(date).format("YYYY-MM-DD");
-
-  const filterDate = today
-    ? moment.tz(today, timezone).startOf("day")
-    : moment.tz(timezone).startOf("day");
-
-  const endDate = moment(filterDate).endOf("day");
+  const filterDate = getStartOfTodayInPoland();
+  const endDate = getEndOfTodayInPoland();
 
   const start = await prisma.start.findFirst({
     where: {
       createdAt: {
-        gte: filterDate.toDate(),
-        lt: endDate.toDate(),
+        gte: filterDate,
+        lt: endDate,
       },
     },
     orderBy: {
@@ -167,21 +146,14 @@ export async function getTodayStart(_userId?: number) {
 }
 
 export async function getTodayBookingCount(userId?: number) {
-  const timezone = "Europe/Warsaw"; // GMT+2
-  const date = new Date();
-  const today = moment(date).format("YYYY-MM-DD");
-
-  const filterDate = today
-    ? moment.tz(today, timezone).startOf("day")
-    : moment.tz(timezone).startOf("day");
-
-  const endDate = moment(filterDate).endOf("day");
+  const filterDate = getStartOfTodayInPoland();
+  const endDate = getEndOfTodayInPoland();
 
   const bookingCount = await prisma.booking.count({
     where: {
       createdAt: {
-        gte: filterDate.toDate(),
-        lt: endDate.toDate(),
+        gte: filterDate,
+        lt: endDate,
       },
       ...(userId && { userId }),
     },
@@ -493,16 +465,12 @@ export async function getUserServicePrices(userId: number) {
   }
 }
 
+import { getStartOfTodayInPoland, getEndOfTodayInPoland } from "@/lib/utils";
+
 export async function getDashboardData(userId: number) {
-  const timezone = "Europe/Warsaw"; // GMT+2
-  const date = new Date();
-  const today = moment(date).format("YYYY-MM-DD");
-
-  const filterDate = today
-    ? moment.tz(today, timezone).startOf("day")
-    : moment.tz(timezone).startOf("day");
-
-  const endDate = moment(filterDate).endOf("day");
+  // Use centralized timezone utilities
+  const filterDate = getStartOfTodayInPoland();
+  const endDate = getEndOfTodayInPoland();
 
   // Check if user is admin
   const isAdmin = await isUserAdmin(userId);
@@ -522,8 +490,8 @@ export async function getDashboardData(userId: number) {
       where: {
         userId,
         createdAt: {
-          gte: filterDate.toDate(),
-          lt: endDate.toDate(),
+          gte: filterDate,
+          lt: endDate,
         },
       },
       _sum: {
@@ -536,8 +504,8 @@ export async function getDashboardData(userId: number) {
       where: {
         userId,
         createdAt: {
-          gte: filterDate.toDate(),
-          lt: endDate.toDate(),
+          gte: filterDate,
+          lt: endDate,
         },
       },
       _sum: {
@@ -549,8 +517,8 @@ export async function getDashboardData(userId: number) {
     prisma.start.findFirst({
       where: {
         createdAt: {
-          gte: filterDate.toDate(),
-          lt: endDate.toDate(),
+          gte: filterDate,
+          lt: endDate,
         },
       },
       select: {
@@ -566,8 +534,8 @@ export async function getDashboardData(userId: number) {
       where: {
         userId,
         createdAt: {
-          gte: filterDate.toDate(),
-          lt: endDate.toDate(),
+          gte: filterDate,
+          lt: endDate,
         },
       },
     }),
@@ -576,8 +544,8 @@ export async function getDashboardData(userId: number) {
     isAdmin ? prisma.booking.aggregate({
       where: {
         createdAt: {
-          gte: filterDate.toDate(),
-          lt: endDate.toDate(),
+          gte: filterDate,
+          lt: endDate,
         },
       },
       _sum: {
@@ -589,8 +557,8 @@ export async function getDashboardData(userId: number) {
     isAdmin ? prisma.product.aggregate({
       where: {
         createdAt: {
-          gte: filterDate.toDate(),
-          lt: endDate.toDate(),
+          gte: filterDate,
+          lt: endDate,
         },
       },
       _sum: {
@@ -602,8 +570,8 @@ export async function getDashboardData(userId: number) {
     isAdmin ? prisma.booking.count({
       where: {
         createdAt: {
-          gte: filterDate.toDate(),
-          lt: endDate.toDate(),
+          gte: filterDate,
+          lt: endDate,
         },
       },
     }) : Promise.resolve(null),
