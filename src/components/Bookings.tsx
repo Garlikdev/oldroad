@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import moment from "moment";
-import { getAllBookings, getAllStarts } from "@/lib/actions/service.action";
+import { getAllBookings, getAllStarts } from "@/lib/actions";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

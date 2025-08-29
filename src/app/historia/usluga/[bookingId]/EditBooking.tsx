@@ -13,7 +13,7 @@ import {
   getBookingById,
   getUserServicePrice,
   getUserServices,
-} from "@/lib/actions/service.action";
+} from "@/lib/actions";
 import {
   Select,
   SelectContent,

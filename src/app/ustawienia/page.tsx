@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Save, Scissors } from "lucide-react";
-import { getUserServicePrices, updateUserServicePrice } from "@/lib/actions/service.action";
+import { getUserServicePrices, updateUserServicePrice } from "@/lib/actions";
 import { toast } from "sonner";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 

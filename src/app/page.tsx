@@ -20,7 +20,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import {
   getDashboardData,
-} from "@/lib/actions/service.action";
+} from "@/lib/actions";
 
 export default function HomePage() {
   const { data: session, status } = useSession();

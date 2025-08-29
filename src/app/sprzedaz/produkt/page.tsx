@@ -17,7 +17,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createProduct } from "@/lib/actions/service.action";
+import { createProduct } from "@/lib/actions";
 import { Input } from "@/components/ui/input";
 import {
   Form,

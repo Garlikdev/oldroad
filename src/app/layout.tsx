@@ -3,7 +3,7 @@ import Providers from "@/lib/providers";
 import { ThemeProvider } from "../components/theme/theme-provider";
 import { GeistSans } from "geist/font/sans";
 import { Toaster } from "@/components/ui/sonner";
-import { getUsers } from "@/lib/actions/service.action";
+import { getUsers } from "@/lib/actions";
 import {
   dehydrate,
   HydrationBoundary,

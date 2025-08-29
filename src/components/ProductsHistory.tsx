@@ -5,7 +5,7 @@ import moment from "moment";
 import {
   getAllProducts,
   getAllStarts,
-} from "@/lib/actions/service.action";
+} from "@/lib/actions";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

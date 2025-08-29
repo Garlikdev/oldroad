@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "../../components/ui/select";
 import { useMemo, useState } from "react";
-import { getAllBookingsChart } from "@/lib/actions/service.action";
+import { getAllBookingsChart } from "@/lib/actions";
 import { Skeleton } from "../../components/ui/skeleton";
 
 const timezone = "Europe/Warsaw";

@@ -11,7 +11,7 @@ import {
   getTodaySumBookingsLegacy as getTodaySumBookings,
   getTodaySumProductsLegacy as getTodaySumProducts,
   getTodayStartLegacy as getTodayStart,
-} from "@/lib/actions/service.action";
+} from "@/lib/actions";
 import { useQuery } from "@tanstack/react-query";
 import { Banknote, Box, Equal, HardHatIcon } from "lucide-react";
 
