@@ -1,6 +1,6 @@
 "use client";
 
-import { useUserStore } from "@/lib/hooks/userStore";
+import { useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
 import moment from "moment-timezone";
 import "moment/locale/pl";
@@ -26,7 +26,7 @@ import { Skeleton } from "../../components/ui/skeleton";
 const timezone = "Europe/Warsaw";
 
 export function EarningsChart() {
-  const user = useUserStore((state) => state.user);
+  const { data: session } = useSession();
   const [viewMode, setViewMode] = useState<"daily" | "monthly">("daily");
 
   const { startDate, endDate } = useMemo(
@@ -41,8 +41,8 @@ export function EarningsChart() {
   );
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["earnings", user?.id, viewMode],
-    queryFn: () => getAllBookingsChart(user?.id || 0, startDate, endDate),
+    queryKey: ["earnings", session?.user?.id, viewMode],
+    queryFn: () => getAllBookingsChart(Number(session?.user?.id) || 0, startDate, endDate),
   });
 
   const chartData = useMemo(() => {
@@ -85,7 +85,7 @@ export function EarningsChart() {
   return (
     <div className="flex w-full flex-col">
       <div className="flex w-full items-center justify-between">
-        <h1>{user?.id === 3 ? "Historia" : "Twoja historia"}</h1>
+        <h1>{session?.user?.role === 'ADMIN' ? "Historia" : "Twoja historia"}</h1>
         <Select value={viewMode} onValueChange={(v) => setViewMode(v as any)}>
           <SelectTrigger className="w-[140px]">
             <SelectValue placeholder="View mode" />

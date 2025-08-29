@@ -3,73 +3,68 @@
 import React, { useState } from "react";
 import { format } from "date-fns";
 import { pl } from "date-fns/locale";
-import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { CalendarIcon } from "@radix-ui/react-icons";
-import { useQueryClient } from "@tanstack/react-query";
-import { Calendar } from "@/components/ui/calendar";
-import { useUserStore } from "@/lib/hooks/userStore";
+import DatePicker from "@/components/DatePicker";
+import { ShoppingCart, Package } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { useSession } from "next-auth/react";
 import ProductsHistory from "@/components/ProductsHistory";
 
 export default function BookingsHistory() {
-  const user = useUserStore((state) => state.user);
+  const { data: session } = useSession();
+  const user = session?.user;
+  const userId = user?.id ? parseInt(user.id) : undefined;
   const [date, setDate] = useState<Date | undefined>(new Date());
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
-  const queryClient = useQueryClient();
-
-  const handleDateChange = async (date: Date | undefined) => {
-    setIsCalendarOpen(false);
-    setDate(date);
-    if (date) {
-      await queryClient.invalidateQueries({
-        queryKey: ["products-by-user", "products-history"],
-      });
-    }
+  const handleDateChange = (selectedDate: Date | undefined) => {
+    setDate(selectedDate);
   };
 
   return (
-    <div className="flex w-full flex-col items-center gap-4">
-      <div className="w-full space-y-4 text-center sm:w-fit">
-        <h1>Historia produktów</h1>
-        <div className="flex flex-col items-center">
-          {user && (
-            <div className="flex flex-col items-center">
-              <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "justify-start text-left font-normal",
-                      !date && "text-muted-foreground",
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {date ? (
-                      format(date, "PPP", { locale: pl })
-                    ) : (
-                      <span>Wybierz dzień</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent align="center" className="w-full">
-                  <Calendar
-                    mode="single"
-                    selected={date}
-                    onSelect={handleDateChange}
-                  />
-                </PopoverContent>
-              </Popover>
-              <ProductsHistory userId={user.id} date={date} />
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-2">
+                <ShoppingCart className="h-8 w-8 text-primary" />
+                <div>
+                  <h1 className="text-2xl font-bold tracking-tight">Historia Produktów</h1>
+                  <p className="text-sm text-muted-foreground">Przeglądaj historię sprzedaży produktów</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="container mx-auto px-4 py-6">
+        <div className="max-w-4xl mx-auto space-y-6">
+          <DatePicker
+            date={date}
+            onDateChange={handleDateChange}
+            description="Wybierz datę poniżej, aby zobaczyć historię sprzedaży produktów z wybranego okresu."
+            queryKeys={["products-by-user", "products-history"]}
+          />
+
+          <Separator />
+
+          {/* History Content */}
+          {user && userId && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Package className="h-5 w-5 text-primary" />
+                <h2 className="text-xl font-semibold">Szczegóły produktów</h2>
+                <div className="ml-auto text-sm text-muted-foreground">
+                  {date ? format(date, "dd/MM/yyyy", { locale: pl }) : "Dzisiaj"}
+                </div>
+              </div>
+              <ProductsHistory userId={userId} date={date} />
             </div>
           )}
         </div>
-      </div>
+      </main>
     </div>
   );
 }

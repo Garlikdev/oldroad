@@ -63,9 +63,16 @@ export async function getUser(pin: string) {
   return userData ? userData : null;
 }
 
-// Usługi
+// Helper function to check if user is admin
+export async function isUserAdmin(userId: number) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { role: true },
+  });
+  return user?.role === 'ADMIN';
+}
 
-export async function getTodaySumBookings() {
+export async function getTodaySumBookings(userId?: number) {
   const timezone = "Europe/Warsaw"; // GMT+2
   const date = new Date();
   const today = moment(date).format("YYYY-MM-DD");
@@ -82,6 +89,7 @@ export async function getTodaySumBookings() {
         gte: filterDate.toDate(),
         lt: endDate.toDate(),
       },
+      ...(userId && { userId }),
     },
     select: {
       price: true,
@@ -96,7 +104,7 @@ export async function getTodaySumBookings() {
   return totalSumBookings;
 }
 
-export async function getTodaySumProducts() {
+export async function getTodaySumProducts(userId?: number) {
   const timezone = "Europe/Warsaw"; // GMT+2
   const date = new Date();
   const today = moment(date).format("YYYY-MM-DD");
@@ -113,6 +121,7 @@ export async function getTodaySumProducts() {
         gte: filterDate.toDate(),
         lt: endDate.toDate(),
       },
+      ...(userId && { userId }),
     },
     select: {
       price: true,
@@ -127,7 +136,7 @@ export async function getTodaySumProducts() {
   return totalSumProducts;
 }
 
-export async function getTodayStart() {
+export async function getTodayStart(userId?: number) {
   const timezone = "Europe/Warsaw"; // GMT+2
   const date = new Date();
   const today = moment(date).format("YYYY-MM-DD");
@@ -137,6 +146,7 @@ export async function getTodayStart() {
     : moment.tz(timezone).startOf("day");
 
   const endDate = moment(filterDate).endOf("day");
+
   const start = await prisma.start.findFirst({
     where: {
       createdAt: {
@@ -151,8 +161,46 @@ export async function getTodayStart() {
       price: true,
     },
   });
+
   const startPrice = start ? start.price : 0;
   return startPrice;
+}
+
+export async function getTodayBookingCount(userId?: number) {
+  const timezone = "Europe/Warsaw"; // GMT+2
+  const date = new Date();
+  const today = moment(date).format("YYYY-MM-DD");
+
+  const filterDate = today
+    ? moment.tz(today, timezone).startOf("day")
+    : moment.tz(timezone).startOf("day");
+
+  const endDate = moment(filterDate).endOf("day");
+
+  const bookingCount = await prisma.booking.count({
+    where: {
+      createdAt: {
+        gte: filterDate.toDate(),
+        lt: endDate.toDate(),
+      },
+      ...(userId && { userId }),
+    },
+  });
+
+  return bookingCount;
+}
+
+// Legacy functions for backward compatibility
+export async function getTodaySumBookingsLegacy() {
+  return getTodaySumBookings();
+}
+
+export async function getTodaySumProductsLegacy() {
+  return getTodaySumProducts();
+}
+
+export async function getTodayStartLegacy() {
+  return getTodayStart();
 }
 
 export async function getAllBookings(userId: number, date?: string) {
@@ -164,8 +212,10 @@ export async function getAllBookings(userId: number, date?: string) {
 
   const endDate = moment(filterDate).endOf("day");
 
+  const isAdmin = await isUserAdmin(userId);
+
   let bookings;
-  if (userId === 3) {
+  if (isAdmin) {
     bookings = await prisma.booking.findMany({
       where: {
         createdAt: {
@@ -207,8 +257,10 @@ export async function getAllProducts(userId: number, date?: string) {
 
   const endDate = moment(filterDate).endOf("day");
 
+  const isAdmin = await isUserAdmin(userId);
+
   let products;
-  if (userId === 3) {
+  if (isAdmin) {
     products = await prisma.product.findMany({
       where: {
         createdAt: {
@@ -251,11 +303,13 @@ export async function getAllBookingsChart(
     const filterStart = moment.tz(startDate, timezone).startOf("day");
     const filterEnd = moment.tz(endDate, timezone).endOf("day");
 
+    const isAdmin = await isUserAdmin(userId);
+
     const whereClause: Prisma.BookingWhereInput = {
       AND: [
         { createdAt: { gte: filterStart.toDate() } },
         { createdAt: { lte: filterEnd.toDate() } },
-        userId !== 3 ? { userId } : {},
+        !isAdmin ? { userId } : {},
       ],
     };
 
@@ -390,10 +444,212 @@ export async function getUserServicePrice(userId: number, serviceId: number) {
   }
 }
 
+export async function setUserServicePrice(userId: number, serviceId: number, price: number) {
+  try {
+    const userServicePrice = await prisma.userServicePrice.upsert({
+      where: {
+        userId_serviceId: {
+          userId,
+          serviceId,
+        },
+      },
+      update: {
+        price,
+      },
+      create: {
+        userId,
+        serviceId,
+        price,
+      },
+    });
+
+    return userServicePrice;
+  } catch (error) {
+    console.error("Błąd podczas ustawiania ceny usługi:", error);
+    throw new Error("Nie udało się ustawić ceny usługi");
+  }
+}
+
+export async function getUserServicePrices(userId: number) {
+  try {
+    const userServicePrices = await prisma.userServicePrice.findMany({
+      where: {
+        userId,
+      },
+      include: {
+        service: true,
+      },
+      orderBy: {
+        service: {
+          name: "asc",
+        },
+      },
+    });
+
+    return userServicePrices;
+  } catch (error) {
+    console.error("Błąd podczas pobierania cen usług:", error);
+    throw new Error("Nie udało się pobrać cen usług");
+  }
+}
+
+export async function getDashboardData(userId: number) {
+  const timezone = "Europe/Warsaw"; // GMT+2
+  const date = new Date();
+  const today = moment(date).format("YYYY-MM-DD");
+
+  const filterDate = today
+    ? moment.tz(today, timezone).startOf("day")
+    : moment.tz(timezone).startOf("day");
+
+  const endDate = moment(filterDate).endOf("day");
+
+  // Check if user is admin
+  const isAdmin = await isUserAdmin(userId);
+
+  // Single query to get all dashboard data
+  const [
+    userBookingsResult,
+    userProductsResult,
+    startResult,
+    userBookingCountResult,
+    allBookingsResult,
+    allProductsResult,
+    allBookingCountResult
+  ] = await Promise.all([
+    // User bookings sum
+    prisma.booking.aggregate({
+      where: {
+        userId,
+        createdAt: {
+          gte: filterDate.toDate(),
+          lt: endDate.toDate(),
+        },
+      },
+      _sum: {
+        price: true,
+      },
+    }),
+
+    // User products sum
+    prisma.product.aggregate({
+      where: {
+        userId,
+        createdAt: {
+          gte: filterDate.toDate(),
+          lt: endDate.toDate(),
+        },
+      },
+      _sum: {
+        price: true,
+      },
+    }),
+
+    // Global start cash
+    prisma.start.findFirst({
+      where: {
+        createdAt: {
+          gte: filterDate.toDate(),
+          lt: endDate.toDate(),
+        },
+      },
+      select: {
+        price: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    }),
+
+    // User booking count
+    prisma.booking.count({
+      where: {
+        userId,
+        createdAt: {
+          gte: filterDate.toDate(),
+          lt: endDate.toDate(),
+        },
+      },
+    }),
+
+    // All bookings sum (only for admin)
+    isAdmin ? prisma.booking.aggregate({
+      where: {
+        createdAt: {
+          gte: filterDate.toDate(),
+          lt: endDate.toDate(),
+        },
+      },
+      _sum: {
+        price: true,
+      },
+    }) : Promise.resolve(null),
+
+    // All products sum (only for admin)
+    isAdmin ? prisma.product.aggregate({
+      where: {
+        createdAt: {
+          gte: filterDate.toDate(),
+          lt: endDate.toDate(),
+        },
+      },
+      _sum: {
+        price: true,
+      },
+    }) : Promise.resolve(null),
+
+    // All booking count (only for admin)
+    isAdmin ? prisma.booking.count({
+      where: {
+        createdAt: {
+          gte: filterDate.toDate(),
+          lt: endDate.toDate(),
+        },
+      },
+    }) : Promise.resolve(null),
+  ]);
+
+  return {
+    // User data (always returned)
+    userBookings: userBookingsResult._sum.price || 0,
+    userProducts: userProductsResult._sum.price || 0,
+    userBookingCount: userBookingCountResult,
+    startCash: startResult?.price || 0,
+
+    // Admin data (only returned if user is admin)
+    ...(isAdmin && {
+      allBookings: allBookingsResult?._sum.price || 0,
+      allProducts: allProductsResult?._sum.price || 0,
+      allBookingCount: allBookingCountResult || 0,
+    }),
+
+    isAdmin,
+  };
+}
+
 // startowy hajs
 export async function createStart(data: { createdAt: Date; price: number }) {
   try {
     const { price, createdAt } = data;
+
+    // Check if a start entry already exists for today
+    const timezone = "Europe/Warsaw"; // GMT+2
+    const today = moment(createdAt).format("YYYY-MM-DD");
+    const filterDate = moment.tz(today, timezone).startOf("day");
+    const endDate = moment(filterDate).endOf("day");
+
+    const existingStart = await prisma.start.findFirst({
+      where: {
+        createdAt: {
+          gte: filterDate.toDate(),
+          lt: endDate.toDate(),
+        },
+      },
+    });
+
+    if (existingStart) {
+      throw new Error("Startowy hajs został już dodany na dzisiaj");
+    }
 
     const newStart = await prisma.start.create({
       data: {
@@ -405,7 +661,7 @@ export async function createStart(data: { createdAt: Date; price: number }) {
     return newStart;
   } catch (err) {
     console.error(err);
-    return null;
+    throw err; // Re-throw to handle in the UI
   }
 }
 
@@ -428,4 +684,8 @@ export async function getAllStarts(date?: string) {
     orderBy: { createdAt: "desc" },
   });
   return starts;
+}
+
+export async function updateUserServicePrice(userId: number, serviceId: number, price: number) {
+  return setUserServicePrice(userId, serviceId, price);
 }

@@ -5,6 +5,10 @@ import moment from "moment";
 import { getAllBookings, getAllStarts } from "@/lib/actions/service.action";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { DollarSign, AlertTriangle, CheckCircle } from "lucide-react";
 import { Pencil2Icon } from "@radix-ui/react-icons";
 import {
   Table,
@@ -61,29 +65,45 @@ export default function AllBookingsComponent({
   );
 
   return (
-    <div className="flex w-full flex-col items-center gap-4 py-4">
-      {starts?.length ? (
-        <div className="flex flex-col">
-          {starts?.map((start) => (
-            <div
+    <div className="space-y-6">
+      {/* Status Section */}
+      <div className="flex flex-wrap gap-3">
+        {starts?.length ? (
+          starts?.map((start) => (
+            <Badge
               key={start.id}
-              className={`flex gap-1 ${start?.price ? "bg-green-300 dark:bg-green-700" : "bg-gred-500"} rounded-lg px-4 py-2`}
+              variant={start?.price ? "default" : "destructive"}
+              className="flex items-center gap-2"
             >
-              <p>Startowy: {start.price}zł</p>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p className="rounded-lg bg-red-300 px-2 py-1 dark:bg-red-700">
-          Brak startowego
-        </p>
-      )}
+              {start?.price ? (
+                <CheckCircle className="h-4 w-4" />
+              ) : (
+                <AlertTriangle className="h-4 w-4" />
+              )}
+              Startowy: {start.price}zł
+            </Badge>
+          ))
+        ) : (
+          <Badge variant="destructive" className="flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4" />
+            Brak startowego
+          </Badge>
+        )}
+
+        {bookings?.length ? (
+          <Badge variant="secondary" className="flex items-center gap-2">
+            <DollarSign className="h-4 w-4" />
+            Suma usług: {totalPrice}zł
+          </Badge>
+        ) : null}
+      </div>
+
+      <Separator />
+
+      {/* Bookings Table */}
       {bookings?.length ? (
-        <div className="flex w-full flex-col items-center">
-          <div className="bg-secondary mb-4 w-fit rounded-lg px-4 py-2">
-            <p>Suma usług: {totalPrice}zł</p>
-          </div>
-          <Table className="w-full text-lg">
+        <div className="rounded-lg border bg-card">
+          <Table>
             <TableHeader>
               <TableRow>
                 <TableHead className="text-center">Data</TableHead>
@@ -96,17 +116,25 @@ export default function AllBookingsComponent({
             <TableBody>
               {bookings?.map((booking) => (
                 <TableRow key={booking.id}>
-                  <TableCell className="flex flex-col">
-                    <p>{moment(booking.createdAt).format("DD-MM-YY")}</p>
-                    <p>{moment(booking.createdAt).format("HH:mm")}</p>
+                  <TableCell className="text-center">
+                    <div className="flex flex-col">
+                      <span className="font-medium">
+                        {moment(booking.createdAt).format("DD-MM-YY")}
+                      </span>
+                      <span className="text-sm text-muted-foreground">
+                        {moment(booking.createdAt).format("HH:mm")}
+                      </span>
+                    </div>
                   </TableCell>
-                  <TableCell>{booking.user?.name}</TableCell>
-                  <TableCell>{booking.service?.name}</TableCell>
-                  <TableCell>{booking.price}zł</TableCell>
-                  <TableCell>
+                  <TableCell className="text-center">{booking.user?.name}</TableCell>
+                  <TableCell className="text-center">{booking.service?.name}</TableCell>
+                  <TableCell className="text-center">
+                    <Badge variant="outline">{booking.price}zł</Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
                     <Link href={`/historia/usluga/${booking.id}`}>
-                      <Button className="px-2">
-                        <Pencil2Icon />
+                      <Button size="sm" variant="ghost">
+                        <Pencil2Icon className="h-4 w-4" />
                       </Button>
                     </Link>
                   </TableCell>
@@ -116,7 +144,12 @@ export default function AllBookingsComponent({
           </Table>
         </div>
       ) : (
-        <p>Brak danych</p>
+        <Alert>
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            Brak danych o usługach dla wybranego dnia.
+          </AlertDescription>
+        </Alert>
       )}
     </div>
   );

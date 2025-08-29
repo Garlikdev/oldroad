@@ -4,6 +4,11 @@ import { useQuery } from "@tanstack/react-query";
 import moment from "moment";
 import "moment/locale/pl";
 import { getAllStarts } from "@/lib/actions/service.action";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { DollarSign, AlertTriangle, CheckCircle, Banknote } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function AllStartsComponent({
   date,
@@ -28,33 +33,69 @@ export default function AllStartsComponent({
   if (isLoadingStarts) return <div>Ładowanie...</div>;
   if (isError) return <div>Błąd ładowania danych</div>;
 
+  const totalStarts = starts?.reduce(
+    (sum: number, start: { price: number }) => sum + start.price,
+    0,
+  );
+
   return (
-    <div className="flex flex-col items-center gap-4 py-4">
+    <div className="space-y-6">
+      {/* Status Section */}
+      <div className="flex flex-wrap gap-3">
+        {starts?.length ? (
+          <>
+            <Badge variant="secondary" className="flex items-center gap-2">
+              <DollarSign className="h-4 w-4" />
+              Łączna kwota startowa: {totalStarts}zł
+            </Badge>
+            <Badge variant="outline" className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4" />
+              Ilość wpisów: {starts.length}
+            </Badge>
+          </>
+        ) : (
+          <Badge variant="destructive" className="flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4" />
+            Brak danych startowych
+          </Badge>
+        )}
+      </div>
+
+      <Separator />
+
+      {/* Starts List */}
       {starts?.length ? (
-        <div className="flex flex-col">
+        <div className="space-y-3">
           {starts?.map((start) => (
-            <div
-              key={start.id}
-              className="grid grid-cols-2 items-center gap-2 border-b py-1 text-lg last:border-none sm:gap-3 sm:text-sm md:gap-4"
-            >
-              <div className="flex flex-col">
-                <p>
-                  {moment(start.createdAt).locale("pl").format("DD MMMM YYYY")}
-                </p>
-              </div>
-              <div className="flex justify-end">{start.price}zł</div>
-              <div className="flex justify-end">
-                {/* <Link href={`/historia/start/${start.id}`}>
-                  <Button className="px-2">
-                    <Pencil2Icon />
-                  </Button>
-                </Link> */}
-              </div>
-            </div>
+            <Card key={start.id} className="border-l-4 border-l-primary">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Banknote className="h-5 w-5 text-primary" />
+                    <div>
+                      <p className="font-medium">
+                        {moment(start.createdAt).locale("pl").format("DD MMMM YYYY")}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {moment(start.createdAt).locale("pl").format("HH:mm")}
+                      </p>
+                    </div>
+                  </div>
+                  <Badge variant="default" className="text-lg px-3 py-1">
+                    {start.price} zł
+                  </Badge>
+                </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
       ) : (
-        <p>Brak danych</p>
+        <Alert>
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            Brak danych o kwotach startowych dla wybranego dnia.
+          </AlertDescription>
+        </Alert>
       )}
     </div>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { format } from "date-fns";
 import { pl } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import {
 import { cn } from "@/lib/utils";
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { Calendar } from "@/components/ui/calendar";
-import { useUserStore } from "@/lib/hooks/userStore";
+import { useSession } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -43,6 +43,7 @@ import AllBookingsComponent from "@/components/Bookings";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
 import { Separator } from "@/components/ui/separator";
+import { Scissors } from "lucide-react";
 
 const schema = z.object({
   userId: z.number().positive({ message: "User ID" }),
@@ -55,6 +56,7 @@ type BookingFormValues = z.infer<typeof schema>;
 
 export default function AddService() {
   const queryClient = useQueryClient();
+  const serviceSelectRef = useRef<HTMLButtonElement>(null);
 
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [historyDate, setHistoryDate] = useState<Date | undefined>(new Date());
@@ -62,23 +64,25 @@ export default function AddService() {
   const [isHistoryCalendarOpen, setIsHistoryCalendarOpen] = useState(false);
   const [serviceId, setServiceId] = useState<number | undefined>(undefined);
 
-  const user = useUserStore((state) => state.user);
+  const { data: session } = useSession();
+  const user = session?.user;
+  const userId = user?.id ? parseInt(user.id) : undefined;
 
   const { data: services, isLoading: isLoadingServices } = useQuery({
-    queryKey: ["services", user?.id],
+    queryKey: ["services", userId],
     queryFn: async () => {
-      if (user?.id) {
-        return await getUserServices(user.id);
+      if (userId) {
+        return await getUserServices(userId);
       }
       return [];
     },
-    enabled: !!user?.id,
+    enabled: !!userId,
   });
 
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: {
-      userId: user?.id || 0,
+      userId: userId || 0,
       serviceId: undefined,
       price: undefined,
       createdAt: new Date(),
@@ -92,17 +96,17 @@ export default function AddService() {
     refetch: refetchPrice,
     isLoading: isLoadingPrice,
   } = useQuery({
-    queryKey: ["user-service-price", user?.id, serviceId],
+    queryKey: ["user-service-price", userId, serviceId],
     queryFn: async () => {
-      if (user?.id && serviceId) {
-        const price = await getUserServicePrice(user?.id, serviceId);
+      if (userId && serviceId) {
+        const price = await getUserServicePrice(userId, serviceId);
         form.setValue("price", price ?? 0);
         return price;
       }
       return 0;
     },
     refetchOnWindowFocus: false,
-    enabled: !!serviceId && !!user?.id,
+    enabled: !!serviceId && !!userId,
   });
 
   const createBookingMutation = useMutation({
@@ -112,7 +116,7 @@ export default function AddService() {
     },
     onSuccess: async () => {
       toast.success("Sukces", {
-        description: `Wykonanie usługi dodane!`,
+        description: `Nowa wizyta dodana!`,
         className: "bg-green-400 dark:bg-green-700",
         duration: 4000,
       });
@@ -167,219 +171,280 @@ export default function AddService() {
     form.setValue("createdAt", date ?? new Date());
   }, [date, form]);
 
-  return (
-    <div className="flex w-full flex-col items-center gap-4">
-      <div className="space-y-6">
-        <h1>Sprzedaż usługa</h1>
-        <div className="flex flex-col">
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="w-full space-y-6"
-            >
-              <FormField
-                name="userId"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem className="flex flex-col items-center">
-                    <FormLabel className="text-base">Frygacz</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Frygacz"
-                        {...field}
-                        value={user?.id || ""}
-                        className="hidden"
-                        disabled
-                      />
-                    </FormControl>
-                    <div className="bg-muted flex h-10 items-center justify-center rounded-md border px-3">
-                      {user ? (
-                        <span className="font-medium">{user.name}</span>
-                      ) : (
-                        <Spinner size="small" />
-                      )}
-                    </div>
+  // Auto-focus on service select when component mounts
+  useEffect(() => {
+    if (serviceSelectRef.current) {
+      serviceSelectRef.current.focus();
+    }
+  }, []);
 
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                name="createdAt"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem className="flex flex-col items-center">
-                    <FormLabel className="text-base">Data</FormLabel>
-                    <FormControl>
-                      <div>
-                        <Input
-                          type="hidden"
-                          {...field}
-                          value={field.value ? field.value.toISOString() : ""}
-                        />
-                        <Popover
-                          open={isCalendarOpen}
-                          onOpenChange={setIsCalendarOpen}
-                        >
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant="outline"
-                              className="h-12 justify-start text-base"
-                            >
-                              <CalendarIcon className="mr-2 h-4 w-4" />
-                              {date
-                                ? format(date, "PPP", { locale: pl })
-                                : "Wybierz dzień"}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent align="center" className="w-full">
-                            <Calendar
-                              mode="single"
-                              selected={date}
-                              onSelect={handleDateChange}
-                            />
-                          </PopoverContent>
-                        </Popover>
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                name="serviceId"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem className="flex flex-col items-center">
-                    <FormLabel className="text-base">Usługa</FormLabel>
-                    <Select
-                      value={field.value ? field.value.toString() : ""}
-                      name={field.name}
-                      onValueChange={handleServiceChange}
-                    >
-                      <FormControl className="w-full">
-                        <SelectTrigger className="h-12 text-base">
-                          <SelectValue
-                            onBlur={field.onBlur}
-                            ref={field.ref}
-                            placeholder="Wybierz usługę"
-                          />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent align="center">
-                        {services ? (
-                          <div>
-                            {services?.map((service) => (
-                              <SelectItem
-                                key={service.id}
-                                value={service.id.toString()}
-                              >
-                                {service.name}
-                              </SelectItem>
-                            ))}
-                          </div>
-                        ) : (
-                          <p>Brak danych</p>
-                        )}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="price"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col items-center">
-                    <FormLabel className="text-base">Cena</FormLabel>
-                    <FormControl className="h-12 max-w-[160px] text-base">
-                      <Input
-                        placeholder="Cena"
-                        {...field}
-                        value={field.value ?? ""}
-                        onChange={(e) =>
-                          field.onChange(parseInt(e.target.value) || "")
-                        }
-                        disabled={
-                          createBookingMutation.isPending ||
-                          isLoadingPrice ||
-                          isLoadingServices ||
-                          !price
-                        }
-                      />
-                    </FormControl>
-                    <FormDescription>Możesz zmienić cenę</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button
-                type="submit"
-                className="h-12 w-full text-base"
-                disabled={
-                  createBookingMutation.isPending ||
-                  isLoadingPrice ||
-                  isLoadingServices ||
-                  !price ||
-                  !priceField
-                }
-              >
-                {createBookingMutation.isPending ? (
-                  <div className="flex items-center gap-2">
-                    <Spinner size="small" />
-                    Dodawanie...
-                  </div>
-                ) : (
-                  "Dodaj"
-                )}
-              </Button>
-            </form>
-          </Form>
-        </div>
-      </div>
-      <Separator />
-      {/* Historia  */}
-      <div className="w-full space-y-4 text-center sm:w-fit">
-        <h1>Historia usług</h1>
-        <div className="flex flex-col items-center">
-          {user && (
-            <div className="flex flex-col items-center">
-              <Popover
-                open={isHistoryCalendarOpen}
-                onOpenChange={setIsHistoryCalendarOpen}
-              >
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "h-12 justify-start text-left text-base",
-                      !historyDate && "text-muted-foreground",
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {historyDate ? (
-                      format(historyDate, "PPP", { locale: pl })
-                    ) : (
-                      <span>Wybierz dzień</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent align="center" className="w-full">
-                  <Calendar
-                    mode="single"
-                    selected={historyDate}
-                    onSelect={handleHistoryDateChange}
-                  />
-                </PopoverContent>
-              </Popover>
-              {user && (
-                <AllBookingsComponent userId={user.id} date={historyDate} />
-              )}
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-2">
+                <Scissors className="h-8 w-8 text-primary" />
+                <div>
+                  <h1 className="text-2xl font-bold tracking-tight">Nowa wizyta</h1>
+                  <p className="text-sm text-muted-foreground">Dodaj nową wizytę</p>
+                </div>
+              </div>
             </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="container mx-auto px-4 py-6">
+        <div className="max-w-2xl mx-auto space-y-6">
+          {/* Service Sale Form */}
+          <div className="space-y-6">
+            <div className="text-center">
+              <p className="text-sm text-muted-foreground">
+                Wybierz datę, usługę i wprowadź szczegóły sprzedaży
+              </p>
+            </div>
+
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-6"
+              >
+                <FormField
+                  name="userId"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Frygacz</FormLabel>
+                      <FormControl>
+                        <div>
+                          <Input
+                            placeholder="Frygacz"
+                            {...field}
+                            value={user?.id || ""}
+                            className="hidden"
+                            disabled
+                          />
+                          <div className="bg-muted flex h-10 items-center justify-center rounded-md border px-3">
+                            {user ? (
+                              <span className="font-medium">{user.name}</span>
+                            ) : (
+                              <Spinner size="small" />
+                            )}
+                          </div>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  name="createdAt"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Data sprzedaży</FormLabel>
+                      <FormControl>
+                        <div>
+                          <Input
+                            type="hidden"
+                            {...field}
+                            value={field.value ? field.value.toISOString() : ""}
+                          />
+                          <Popover
+                            open={isCalendarOpen}
+                            onOpenChange={setIsCalendarOpen}
+                          >
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="outline"
+                                className={cn(
+                                  "w-full justify-start text-left font-normal h-12",
+                                  !date && "text-muted-foreground"
+                                )}
+                              >
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {date ? (
+                                  format(date, "PPP", { locale: pl })
+                                ) : (
+                                  <span>Wybierz dzień</span>
+                                )}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent align="center" className="w-auto p-0">
+                              <Calendar
+                                mode="single"
+                                selected={date}
+                                onSelect={handleDateChange}
+                                autoFocus
+                              />
+                            </PopoverContent>
+                          </Popover>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  name="serviceId"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Wybierz usługę</FormLabel>
+                      <Select
+                        value={field.value ? field.value.toString() : ""}
+                        name={field.name}
+                        onValueChange={handleServiceChange}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-12 text-base w-full" ref={serviceSelectRef}>
+                            <SelectValue
+                              onBlur={field.onBlur}
+                              ref={field.ref}
+                              placeholder="Wybierz usługę"
+                            />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent align="center">
+                          {services ? (
+                            <div>
+                              {services?.map((service) => (
+                                <SelectItem
+                                  key={service.id}
+                                  value={service.id.toString()}
+                                >
+                                  {service.name}
+                                </SelectItem>
+                              ))}
+                            </div>
+                          ) : (
+                            <p>Brak danych</p>
+                          )}
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        Wybierz usługę do sprzedaży
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="price"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Cena (zł)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="0"
+                          className="h-12 text-base w-full"
+                          {...field}
+                          value={field.value || ""}
+                          onChange={(e) =>
+                            field.onChange(parseInt(e.target.value) || 0)
+                          }
+                          disabled={
+                            createBookingMutation.isPending ||
+                            isLoadingPrice ||
+                            isLoadingServices ||
+                            !price
+                          }
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Cena zostanie automatycznie wypełniona po wyborze usługi
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <Button
+                  type="submit"
+                  className="w-full h-12 text-lg"
+                  disabled={
+                    createBookingMutation.isPending ||
+                    isLoadingPrice ||
+                    isLoadingServices ||
+                    !price ||
+                    !priceField
+                  }
+                >
+                  {createBookingMutation.isPending ? (
+                    <>
+                      <Spinner size="small" className="mr-2" />
+                      Dodawanie...
+                    </>
+                  ) : (
+                    <>
+                      <Scissors className="mr-2 h-4 w-4" />
+                      Dodaj sprzedaż
+                    </>
+                  )}
+                </Button>
+              </form>
+            </Form>
+          </div>
+
+          {/* History Section */}
+          {user && userId && (
+            <>
+              <Separator />
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-xl font-semibold">Historia sprzedaży usług</h2>
+                  <div className="text-sm text-muted-foreground">
+                    {historyDate ? format(historyDate, "dd/MM/yyyy", { locale: pl }) : "Dzisiaj"}
+                  </div>
+                </div>
+
+                <div className="flex justify-center mb-4">
+                  <Popover
+                    open={isHistoryCalendarOpen}
+                    onOpenChange={setIsHistoryCalendarOpen}
+                  >
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "h-12 justify-start text-left font-normal min-w-[240px]",
+                          !historyDate && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {historyDate ? (
+                          format(historyDate, "PPP", { locale: pl })
+                        ) : (
+                          <span>Wybierz dzień</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent align="center" className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={historyDate}
+                        onSelect={handleHistoryDateChange}
+                        autoFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                <AllBookingsComponent userId={userId} date={historyDate} />
+              </div>
+            </>
           )}
         </div>
-      </div>
+      </main>
     </div>
   );
 }

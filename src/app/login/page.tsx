@@ -20,13 +20,9 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { toast } from "sonner";
-import { useMutation } from "@tanstack/react-query";
-import { getUser } from "@/lib/actions/service.action";
-import { useEffect } from "react";
-import { useUserStore } from "@/lib/hooks/userStore";
-import type { User } from "@/types/user";
-import { useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { signIn } from "next-auth/react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, Suspense } from "react";
 
 const FormSchema = z.object({
   pin: z.string().min(4, {
@@ -34,13 +30,10 @@ const FormSchema = z.object({
   }),
 });
 
-export default function Login() {
+function LoginForm() {
   const router = useRouter();
-  const setUser = useUserStore((state) => state.setUser);
-
-  const handleLogin = (userInfo: User) => {
-    setUser(userInfo);
-  };
+  const searchParams = useSearchParams();
+  const from = searchParams.get("from") || "/";
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -51,41 +44,32 @@ export default function Login() {
 
   const { setFocus } = form;
 
-  const retrieveUser = useMutation({
-    mutationKey: ["retrieveUser"],
-    mutationFn: async (pin: string) => {
-      const user = await getUser(pin);
-      if (user) {
-        handleLogin(user);
-        router.push("/");
-        return user;
-      } else {
+  async function onSubmit(data: z.infer<typeof FormSchema>) {
+    try {
+      const result = await signIn("credentials", {
+        pin: data.pin,
+        redirect: false,
+      });
+
+      if (result?.error) {
         toast.error("Błąd", {
-          description: `Niepoprawny pin`,
+          description: "Niepoprawny PIN",
           duration: 1000,
         });
-      }
-      return user;
-    },
-    onSuccess: (data) => {
-      if (data) {
+      } else if (result?.ok) {
         toast.success("Sukces", {
-          description: `Zalogowano`,
-          className: "bg-green-400 dark:bg-green-700",
+          description: "Zalogowano pomyślnie",
           duration: 1000,
         });
+        router.push(from);
+        router.refresh();
       }
-    },
-    onError: () => {
+    } catch (error) {
       toast.error("Błąd", {
-        description: `Nie udało się zalogować`,
+        description: "Wystąpił błąd podczas logowania",
         duration: 4000,
       });
-    },
-  });
-
-  function onSubmit(data: z.infer<typeof FormSchema>) {
-    retrieveUser.mutate(data.pin);
+    }
   }
 
   useEffect(() => {
@@ -112,6 +96,10 @@ export default function Login() {
                         maxLength={4}
                         {...field}
                         pattern={REGEXP_ONLY_DIGITS}
+                        onComplete={() => {
+                          // Auto-submit when all 4 digits are filled
+                          form.handleSubmit(onSubmit)();
+                        }}
                       >
                         <InputOTPGroup>
                           <InputOTPSlot index={0} />
@@ -127,11 +115,21 @@ export default function Login() {
                 )}
               />
 
-              <Button type="submit">Zaloguj</Button>
+              <Button type="submit" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting ? "Logowanie..." : "Zaloguj"}
+              </Button>
             </form>
           </Form>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function Login() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
+      <LoginForm />
+    </Suspense>
   );
 }

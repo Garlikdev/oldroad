@@ -174,13 +174,13 @@ const EditBooking = ({ bookingId }: { bookingId: string }) => {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="flex w-full flex-col items-center justify-center space-y-4"
+        className="w-full space-y-6"
       >
         <FormField
           name="createdAt"
           control={form.control}
           render={({ field }) => (
-            <FormItem className="flex flex-col items-center">
+            <FormItem>
               <FormLabel>Data</FormLabel>
               <FormControl>
                 <div>
@@ -197,7 +197,7 @@ const EditBooking = ({ bookingId }: { bookingId: string }) => {
                       <Button
                         variant={"outline"}
                         className={cn(
-                          "justify-start text-left text-lg",
+                          "w-full justify-start text-left text-lg h-12",
                           !date && "text-muted-foreground",
                         )}
                       >
@@ -227,15 +227,15 @@ const EditBooking = ({ bookingId }: { bookingId: string }) => {
           name="serviceId"
           control={form.control}
           render={({ field }) => (
-            <FormItem className="flex flex-col items-center">
+            <FormItem>
               <FormLabel>Usługa</FormLabel>
               <Select
                 value={field.value ? field.value.toString() : ""}
                 name={field.name}
                 onValueChange={handleServiceChange}
               >
-                <FormControl className="w-full">
-                  <SelectTrigger>
+                <FormControl>
+                  <SelectTrigger className="w-full h-12">
                     <SelectValue
                       onBlur={field.onBlur}
                       ref={field.ref}
@@ -268,11 +268,12 @@ const EditBooking = ({ bookingId }: { bookingId: string }) => {
           control={form.control}
           name="price"
           render={({ field }) => (
-            <FormItem className="flex flex-col items-center">
+            <FormItem>
               <FormLabel>Cena zapisana: {booking?.price}</FormLabel>
-              <FormControl className="w-[100px]">
+              <FormControl>
                 <Input
                   placeholder="Cena"
+                  className="h-12 text-base w-full"
                   {...field}
                   value={field.value ?? ""}
                   onChange={(e) =>
@@ -292,7 +293,7 @@ const EditBooking = ({ bookingId }: { bookingId: string }) => {
         />
         <Button
           type="submit"
-          className="mx-auto text-lg"
+          className="w-full text-lg"
           disabled={
             editBookingMutation.isPending ||
             isLoadingPrice ||
