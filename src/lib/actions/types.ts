@@ -34,3 +34,8 @@ export type CreateStartData = {
   createdAt: Date;
   price: number;
 };
+
+export type UpdateStartData = {
+  price: number;
+  createdAt: Date;
+};

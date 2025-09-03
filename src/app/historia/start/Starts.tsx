@@ -7,14 +7,22 @@ import { getAllStarts } from "@/lib/actions";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { DollarSign, AlertTriangle, CheckCircle, Banknote } from "lucide-react";
+import { DollarSign, AlertTriangle, CheckCircle, Banknote, Edit } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 export default function AllStartsComponent({
   date,
 }: {
   date: Date | undefined;
 }) {
+  const router = useRouter();
+  const { data: session } = useSession();
+  const user = session?.user;
+  const isAdmin = user?.role === "ADMIN";
+
   const {
     data: starts,
     isLoading: isLoadingStarts,
@@ -81,9 +89,21 @@ export default function AllStartsComponent({
                       </p>
                     </div>
                   </div>
-                  <Badge variant="default" className="text-lg px-3 py-1">
-                    {start.price} zł
-                  </Badge>
+                  <div className="flex items-center gap-3">
+                    <Badge variant="default" className="text-lg px-3 py-1">
+                      {start.price} zł
+                    </Badge>
+                    {isAdmin && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => router.push(`/historia/start/${start.id}`)}
+                        className="h-8 w-8 p-0"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </CardContent>
             </Card>
