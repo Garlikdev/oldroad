@@ -2,16 +2,32 @@
 
 import { useState } from "react";
 import { useSession } from "next-auth/react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Loader2, Save, Scissors } from "lucide-react";
 import { getUserServicePrices, updateUserServicePrice } from "@/lib/actions";
 import { toast } from "sonner";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+
+const priceSchema = z.object({
+  price: z.number().min(0, { message: "Cena musi być większa lub równa 0" }),
+});
+
+type PriceFormValues = z.infer<typeof priceSchema>;
 
 interface ServicePrice {
   id: number;
@@ -25,9 +41,103 @@ interface ServicePrice {
   };
 }
 
+interface ServicePriceCardProps {
+  service: ServicePrice;
+  userId: number;
+  onUpdate: () => void;
+}
+
+function ServicePriceCard({ service, userId, onUpdate }: ServicePriceCardProps) {
+  const [saving, setSaving] = useState(false);
+  
+  const form = useForm<PriceFormValues>({
+    resolver: zodResolver(priceSchema),
+    defaultValues: {
+      price: service.price,
+    },
+  });
+
+  const updatePriceMutation = useMutation({
+    mutationFn: (price: number) => updateUserServicePrice(userId, service.serviceId, price),
+    onSuccess: () => {
+      toast.success("Cena została zaktualizowana");
+      onUpdate();
+    },
+    onError: (error) => {
+      toast.error("Błąd podczas aktualizacji ceny");
+      console.error(error);
+    },
+  });
+
+  const onSubmit = async (data: PriceFormValues) => {
+    setSaving(true);
+    try {
+      await updatePriceMutation.mutateAsync(data.price);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-xl">{service.service.name}</CardTitle>
+          <Badge variant="secondary">Usługa</Badge>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="flex items-center gap-4">
+            <div className="flex-1">
+              <FormField
+                control={form.control}
+                name="price"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cena (PLN)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="1"
+                        min="0"
+                        placeholder="0"
+                        className="mt-1"
+                        {...field}
+                        value={field.value || ""}
+                        onChange={(e) =>
+                          field.onChange(parseFloat(e.target.value) || 0)
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="flex items-end">
+              <Button
+                type="submit"
+                disabled={saving || updatePriceMutation.isPending}
+                className="h-10"
+              >
+                {saving || updatePriceMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4" />
+                )}
+                <span className="ml-2">Zapisz</span>
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function UstawieniaPage() {
   const { data: session } = useSession();
-  const [saving, setSaving] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   const userId = session?.user?.id ? parseInt(session.user.id) : 0;
@@ -39,41 +149,9 @@ export default function UstawieniaPage() {
     enabled: !!userId,
   });
 
-  // React Query mutation for updating prices
-  const updatePriceMutation = useMutation({
-    mutationFn: ({ serviceId, price }: { serviceId: number; price: number }) =>
-      updateUserServicePrice(userId, serviceId, price),
-    onSuccess: () => {
-      // Invalidate and refetch the user service prices
-      queryClient.invalidateQueries({ queryKey: ["userServicePrices", userId] });
-      toast.success("Cena została zaktualizowana");
-    },
-    onError: (error) => {
-      console.error("Error updating price:", error);
-      toast.error("Nie udało się zaktualizować ceny");
-    },
-  });
-
-  const handlePriceUpdate = async (serviceId: number, newPrice: number) => {
-    setSaving(serviceId.toString());
-    try {
-      await updatePriceMutation.mutateAsync({ serviceId, price: newPrice });
-    } finally {
-      setSaving(null);
-    }
-  };
-
-  const handlePriceChange = (serviceId: number, value: string) => {
-    const newPrice = parseFloat(value);
-    if (isNaN(newPrice) || newPrice < 0) return;
-
-    // Optimistically update the UI
-    queryClient.setQueryData(["userServicePrices", userId], (oldData: ServicePrice[] | undefined) => {
-      if (!oldData) return oldData;
-      return oldData.map(service =>
-        service.serviceId === serviceId ? { ...service, price: newPrice } : service
-      );
-    });
+  const handleUpdate = () => {
+    // Invalidate and refetch the user service prices
+    queryClient.invalidateQueries({ queryKey: ["userServicePrices", userId] });
   };
 
   if (isLoading) {
@@ -117,47 +195,12 @@ export default function UstawieniaPage() {
           </Card>
         ) : (
           services.map((service) => (
-            <Card key={service.id}>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl">{service.service.name}</CardTitle>
-                  <Badge variant="secondary">Usługa</Badge>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center gap-4">
-                  <div className="flex-1">
-                    <Label htmlFor={`price-${service.id}`} className="text-sm font-medium">
-                      Cena (PLN)
-                    </Label>
-                    <Input
-                      id={`price-${service.serviceId}`}
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={service.price}
-                      onChange={(e) => handlePriceChange(service.serviceId, e.target.value)}
-                      className="mt-1"
-                      placeholder="0.00"
-                    />
-                  </div>
-                  <div className="flex items-end">
-                    <Button
-                      onClick={() => handlePriceUpdate(service.serviceId, service.price)}
-                      disabled={saving === service.serviceId.toString()}
-                      className="h-10"
-                    >
-                      {saving === service.serviceId.toString() ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Save className="h-4 w-4" />
-                      )}
-                      <span className="ml-2">Zapisz</span>
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <ServicePriceCard
+              key={service.id}
+              service={service}
+              userId={userId}
+              onUpdate={handleUpdate}
+            />
           ))
         )}
       </div>

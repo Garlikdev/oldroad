@@ -1,17 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { format } from "date-fns";
-import { pl } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn, getCurrentDateInPoland } from "@/lib/utils";
-import { CalendarIcon } from "@radix-ui/react-icons";
-import { Calendar } from "@/components/ui/calendar";
+import { getCurrentDateInPoland } from "@/lib/utils";
 import { useSession } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -31,6 +22,7 @@ import {
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
 import { Banknote } from "lucide-react";
+import DatePicker from "@/components/DatePicker";
 
 const schema = z.object({
   price: z.number().positive({ message: "Price" }),
@@ -44,7 +36,6 @@ export default function SprzedazStart() {
   const priceInputRef = useRef<HTMLInputElement>(null);
 
   const [date, setDate] = useState<Date | undefined>(getCurrentDateInPoland());
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   const { data: session } = useSession();
   const user = session?.user;
@@ -85,10 +76,9 @@ export default function SprzedazStart() {
     createStartMutation.mutate(data);
   }
 
-  const handleDateChange = (date: Date | undefined) => {
-    setIsCalendarOpen(false);
-    setDate(date);
-    form.setValue("createdAt", date ?? getCurrentDateInPoland());
+  const handleDateChange = (selectedDate: Date | undefined) => {
+    setDate(selectedDate);
+    form.setValue("createdAt", selectedDate ?? getCurrentDateInPoland());
   };
 
   useEffect(() => {
@@ -131,73 +121,39 @@ export default function SprzedazStart() {
               </p>
             </div>
 
+            {/* Date Picker Component */}
+            <DatePicker
+              date={date}
+              onDateChange={handleDateChange}
+              description="Wybierz dzień dla którego chcesz ustawić kwotę startową. Możesz wybrać dowolną datę."
+              queryKeys={["start-history", "start-today"]}
+            />
+
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="space-y-6"
               >
-                  <FormField
-                    name="createdAt"
-                    control={form.control}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Data</FormLabel>
-                        <FormControl>
-                          <div>
-                            <Input
-                              type="hidden"
-                              {...field}
-                              value={field.value ? field.value.toISOString() : ""}
-                            />
-                            <Popover
-                              open={isCalendarOpen}
-                              onOpenChange={setIsCalendarOpen}
-                            >
-                              <PopoverTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  className={cn(
-                                    "w-full justify-start text-left font-normal h-12",
-                                    !date && "text-muted-foreground"
-                                  )}
-                                >
-                                  <CalendarIcon className="mr-2 h-4 w-4" />
-                                  {date ? (
-                                    format(date, "PPP", { locale: pl })
-                                  ) : (
-                                    <span>Wybierz dzień</span>
-                                  )}
-                                </Button>
-                              </PopoverTrigger>
-                              <PopoverContent align="center" className="w-auto p-0">
-                                <Calendar
-                                  mode="single"
-                                  selected={date}
-                                  onSelect={handleDateChange}
-                                  autoFocus
-                                />
-                              </PopoverContent>
-                            </Popover>
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                {/* Hidden field for createdAt */}
+                <input
+                  type="hidden"
+                  {...form.register("createdAt")}
+                  value={date?.toISOString() || ""}
+                />
 
-                  <FormField
-                    control={form.control}
-                    name="price"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Kwota startowa (zł)</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            placeholder="0"
-                            className="h-12 text-lg w-full"
-                            {...field}
-                            value={field.value || ""}
+                <FormField
+                  control={form.control}
+                  name="price"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Kwota startowa (zł)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="0"
+                          className="h-12 text-lg w-full"
+                          {...field}
+                          value={field.value || ""}
                             onChange={(e) =>
                               field.onChange(parseInt(e.target.value) || 0)
                             }
