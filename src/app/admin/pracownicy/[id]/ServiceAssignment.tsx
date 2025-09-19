@@ -58,6 +58,7 @@ export default function ServiceAssignment({ userId, services, assignedServiceIds
         userId,
         serviceId: parseInt(selectedServiceId),
         price: priceNum,
+        enabled: true,
       });
 
       if (result.success) {
