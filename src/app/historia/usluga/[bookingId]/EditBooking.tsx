@@ -11,8 +11,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   editBooking,
   getBookingById,
-  getUserServicePrice,
-  getUserServices,
+  getUserServicePriceAll,
+  getUserServicesAll,
 } from "@/lib/actions";
 import {
   Select,
@@ -41,6 +41,8 @@ import {
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { Calendar } from "@/components/ui/calendar";
 import { toast } from "sonner";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { User } from "lucide-react";
 
 export const runtime = "edge";
 export const preferredRegion = ["arn1", "fra1"];
@@ -79,7 +81,7 @@ const EditBooking = ({ bookingId }: { bookingId: string }) => {
 
   const { data: services, isLoading: isLoadingServices } = useQuery({
     queryKey: ["services", booking?.user.id],
-    queryFn: async () => await getUserServices(booking?.user.id ?? 0),
+    queryFn: async () => await getUserServicesAll(booking?.user.id ?? 0),
     enabled: !!booking,
   });
 
@@ -98,7 +100,7 @@ const EditBooking = ({ bookingId }: { bookingId: string }) => {
     queryKey: ["user-service-price", booking?.user.id, serviceId],
     queryFn: async () => {
       if (booking && serviceId) {
-        const price = await getUserServicePrice(booking?.user.id, serviceId);
+        const price = await getUserServicePriceAll(booking?.user.id, serviceId);
         form.setValue("price", price ?? 0);
         return price;
       }
@@ -171,11 +173,43 @@ const EditBooking = ({ bookingId }: { bookingId: string }) => {
   }
 
   return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="w-full space-y-6"
-      >
+    <div className="w-full space-y-6">
+      {/* User Information Card */}
+      {booking?.user && (
+        <Card className="border-primary/20 bg-primary/5">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-primary">
+              <User className="h-5 w-5" />
+              Informacje o pracowniku
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p className="font-semibold text-lg text-foreground">{booking.user.name}</p>
+                <p className="text-sm text-muted-foreground">
+                  {booking.user.role === 'ADMIN' ? 'Administrator' : 'Pracownik'}
+                </p>
+              </div>
+              <div className="md:text-right">
+                <p className="text-sm text-muted-foreground mb-1">Data wykonania usługi</p>
+                <p className="font-medium">
+                  {format(booking.createdAt, "dd MMMM yyyy", { locale: pl })}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {format(booking.createdAt, "HH:mm", { locale: pl })}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="w-full space-y-6"
+        >
         <FormField
           name="createdAt"
           control={form.control}
@@ -246,7 +280,7 @@ const EditBooking = ({ bookingId }: { bookingId: string }) => {
                 <SelectContent align="center">
                   {services ? (
                     <div>
-                      {services?.map((service) => (
+                      {services?.map((service: { id: number; name: string }) => (
                         <SelectItem
                           key={service.id}
                           value={service.id.toString()}
@@ -305,6 +339,7 @@ const EditBooking = ({ bookingId }: { bookingId: string }) => {
         </Button>
       </form>
     </Form>
+    </div>
   );
 };
 

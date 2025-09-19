@@ -54,6 +54,7 @@ model UserServicePrice {
   userId    Int
   serviceId Int
   price     Float
+  enabled   Boolean @default(true)
   service   Service @relation(fields: [serviceId], references: [id])
   user      User    @relation(fields: [userId], references: [id])
 

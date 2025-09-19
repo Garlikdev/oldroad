@@ -3,11 +3,10 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { getUserById, getAllServices } from "@/lib/actions/admin";
-import { ArrowLeft, User, Edit, Trash2, Award } from "lucide-react";
-import ServiceAssignment from "./ServiceAssignment";
+import { getUserByIdWithAllServices, getAllServices } from "@/lib/actions/admin";
+import { ArrowLeft, User, Award } from "lucide-react";
+import ServiceManagement from "./ServiceManagement";
 import EditUserForm from "./EditUserForm";
-import ServicesList from "./ServicesList";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -22,7 +21,7 @@ export default async function WorkerDetailPage({ params }: PageProps) {
   }
 
   const [userResult, servicesResult] = await Promise.all([
-    getUserById(userId),
+    getUserByIdWithAllServices(userId),
     getAllServices(),
   ]);
 
@@ -45,7 +44,6 @@ export default async function WorkerDetailPage({ params }: PageProps) {
 
   const user = userResult.data;
   const allServices = servicesResult.data || [];
-  const assignedServiceIds = user.prices.map(p => p.serviceId);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -89,11 +87,16 @@ export default async function WorkerDetailPage({ params }: PageProps) {
             <CardContent>
               <div className="text-center">
                 <div className="text-3xl font-bold text-primary">
-                  {user.prices.length}
+                  {user.prices.filter(p => p.enabled).length}
                 </div>
                 <div className="text-sm text-muted-foreground">
-                  Przypisanych usług
+                  Aktywnych usług
                 </div>
+                {user.prices.filter(p => !p.enabled).length > 0 && (
+                  <div className="text-xs text-muted-foreground mt-1">
+                    +{user.prices.filter(p => !p.enabled).length} wyłączonych
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -101,16 +104,10 @@ export default async function WorkerDetailPage({ params }: PageProps) {
 
         {/* Right Column - Services Management */}
         <div className="space-y-6">
-          {/* Assign New Service */}
-          <ServiceAssignment 
+          {/* Unified Service Management */}
+          <ServiceManagement 
             userId={userId}
-            services={allServices}
-            assignedServiceIds={assignedServiceIds}
-          />
-
-          {/* Assigned Services List */}
-          <ServicesList 
-            userId={userId}
+            allServices={allServices}
             userPrices={user.prices}
           />
         </div>

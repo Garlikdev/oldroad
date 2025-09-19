@@ -23,6 +23,7 @@ const assignServiceSchema = z.object({
   userId: z.number(),
   serviceId: z.number(),
   price: z.number().min(0, "Cena musi być większa lub równa 0"),
+  enabled: z.boolean().optional().default(true),
 });
 
 // Check if user is admin
@@ -34,7 +35,7 @@ async function requireAdmin() {
   return session;
 }
 
-// Get all users with their service prices
+// Get all users with their enabled service prices
 export async function getAllUsers() {
   await requireAdmin();
 
@@ -42,6 +43,9 @@ export async function getAllUsers() {
     const users = await prisma.user.findMany({
       include: {
         prices: {
+          where: {
+            enabled: true, // Only show enabled services
+          },
           include: {
             service: true,
           },
@@ -106,6 +110,38 @@ export async function createUser(data: z.infer<typeof createUserSchema>) {
 
 // Get single user with service prices
 export async function getUserById(userId: number) {
+  await requireAdmin();
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        prices: {
+          include: {
+            service: true,
+          },
+          orderBy: {
+            service: {
+              name: "asc",
+            },
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      return { success: false, error: "Użytkownik nie został znaleziony" };
+    }
+
+    return { success: true, data: user };
+  } catch (error) {
+    console.error("Błąd podczas pobierania użytkownika:", error);
+    return { success: false, error: "Nie udało się pobrać danych użytkownika" };
+  }
+}
+
+// Get single user with ALL service prices (including disabled) for admin management
+export async function getUserByIdWithAllServices(userId: number) {
   await requireAdmin();
 
   try {
@@ -230,7 +266,7 @@ export async function assignServiceToUser(data: z.infer<typeof assignServiceSche
       return { success: false, error: "Usługa nie została znaleziona" };
     }
 
-    // Use upsert to either create or update the price
+    // Use upsert to either create or update the price and enabled status
     const userServicePrice = await prisma.userServicePrice.upsert({
       where: {
         userId_serviceId: {
@@ -242,9 +278,11 @@ export async function assignServiceToUser(data: z.infer<typeof assignServiceSche
         userId: validatedData.userId,
         serviceId: validatedData.serviceId,
         price: validatedData.price,
+        enabled: validatedData.enabled,
       },
       update: {
         price: validatedData.price,
+        enabled: validatedData.enabled,
       },
       include: {
         service: true,
@@ -263,37 +301,21 @@ export async function assignServiceToUser(data: z.infer<typeof assignServiceSche
   }
 }
 
-// Remove service from user (with booking history check)
+// Disable service for user (instead of deleting)
 export async function removeServiceFromUser(userId: number, serviceId: number) {
   await requireAdmin();
 
   try {
-    // First, check if there are any bookings with this user-service combination
-    const existingBookings = await prisma.booking.findFirst({
-      where: {
-        userId,
-        serviceId,
-      },
-      include: {
-        service: true,
-        user: true,
-      },
-    });
-
-    if (existingBookings) {
-      return { 
-        success: false, 
-        error: `Nie można usunąć usługi "${existingBookings.service.name}" dla użytkownika "${existingBookings.user.name}" - istnieją historyczne rekordy wizyt. Usuwanie usług z historią może spowodować problemy z raportami.`
-      };
-    }
-
-    // If no bookings exist, safe to delete
-    await prisma.userServicePrice.delete({
+    // Instead of deleting, set enabled to false
+    await prisma.userServicePrice.update({
       where: {
         userId_serviceId: {
           userId,
           serviceId,
         },
+      },
+      data: {
+        enabled: false,
       },
     });
 
@@ -301,7 +323,12 @@ export async function removeServiceFromUser(userId: number, serviceId: number) {
 
     return { success: true };
   } catch (error) {
-    console.error("Błąd podczas usuwania usługi:", error);
-    return { success: false, error: "Nie udało się usunąć usługi od użytkownika" };
+    // If the record doesn't exist, that's fine - it's already "disabled"
+    if (error && typeof error === 'object' && 'code' in error && error.code === 'P2025') {
+      return { success: true };
+    }
+    
+    console.error("Błąd podczas wyłączania usługi:", error);
+    return { success: false, error: "Nie udało się wyłączyć usługi dla użytkownika" };
   }
 }

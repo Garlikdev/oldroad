@@ -41,7 +41,7 @@ export default function EditBookingPage(props: {
                 <Scissors className="h-8 w-8 text-primary" />
                 <div>
                   <h1 className="text-2xl font-bold tracking-tight">Edycja Usługi</h1>
-                  <p className="text-sm text-muted-foreground">Edytuj szczegóły zapisanej usługi</p>
+                  <p className="text-sm text-muted-foreground">Edytuj szczegóły wykonanej usługi</p>
                 </div>
               </div>
             </div>
@@ -56,7 +56,7 @@ export default function EditBookingPage(props: {
           <div className="space-y-6">
             <div className="text-center">
               <p className="text-sm text-muted-foreground">
-                Zmień szczegóły usługi i zapisz zmiany
+                Sprawdź informacje o pracowniku i edytuj szczegóły wykonanej usługi
               </p>
             </div>
 

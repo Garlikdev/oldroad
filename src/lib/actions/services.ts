@@ -9,6 +9,21 @@ export async function getUserServices(userId: number) {
       prices: {
         some: {
           userId,
+          enabled: true, // Only get services that are enabled for this user
+        },
+      },
+    },
+  });
+  return services;
+}
+
+// Get ALL services (enabled + disabled) for a user - used for historical editing
+export async function getUserServicesAll(userId: number) {
+  const services = await prisma.service.findMany({
+    where: {
+      prices: {
+        some: {
+          userId, // Get all services this user ever had, regardless of enabled status
         },
       },
     },
@@ -25,6 +40,28 @@ export async function getUserServicePrice(userId: number, serviceId: number) {
             userId,
             serviceId,
           },
+          enabled: true, // Only return price if service is enabled
+        },
+      });
+
+    return userServicePrice ? userServicePrice.price : null;
+  } catch {
+    console.error("Brak ustalonej ceny usługi");
+    return null;
+  }
+}
+
+// Get price for any service (enabled or disabled) - used for historical editing
+export async function getUserServicePriceAll(userId: number, serviceId: number) {
+  try {
+    const userServicePrice: UserServicePrice | null =
+      await prisma.userServicePrice.findUnique({
+        where: {
+          userId_serviceId: {
+            userId,
+            serviceId,
+          },
+          // No enabled filter - get price regardless of enabled status
         },
       });
 
@@ -46,11 +83,13 @@ export async function setUserServicePrice(userId: number, serviceId: number, pri
       },
       update: {
         price,
+        enabled: true, // Ensure service is enabled when setting price
       },
       create: {
         userId,
         serviceId,
         price,
+        enabled: true, // Default to enabled when creating
       },
     });
 
@@ -66,6 +105,7 @@ export async function getUserServicePrices(userId: number) {
     const userServicePrices = await prisma.userServicePrice.findMany({
       where: {
         userId,
+        enabled: true, // Only get enabled services
       },
       include: {
         service: true,

@@ -91,9 +91,6 @@ export default function HomePage() {
           <h2 className="text-3xl font-bold tracking-tight">
             Dzień dobry, {userName}! 👋
           </h2>
-          <p className="text-muted-foreground">
-            Oto podsumowanie Twojej dzisiejszej pracy
-          </p>
         </div>
 
         {/* Startowy Hajs Alert */}
@@ -116,8 +113,7 @@ export default function HomePage() {
           {isAdmin && (
             <div className="space-y-4">
               <div className="flex items-center space-x-2">
-                <div className="h-2 w-2 bg-primary rounded-full"></div>
-                <h3 className="text-lg font-semibold">Podsumowanie wszystkich użytkowników</h3>
+                <h3 className="text-lg font-semibold text-balance text-center">Podsumowanie wszystkich użytkowników</h3>
               </div>
               <div className="grid grid-cols-2 gap-2 md:grid-cols-3 lg:grid-cols-4">
                 <Card className="relative overflow-hidden border-2 border-primary/30 bg-gradient-to-br from-primary/10 to-primary/5 shadow-lg">
@@ -189,12 +185,9 @@ export default function HomePage() {
 
           {/* Individual user data */}
           <div className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <div className="h-2 w-2 bg-muted-foreground rounded-full"></div>
-              <h3 className="text-lg font-semibold">
+              <h3 className="text-lg font-semibold text-balance text-center">
                 {isAdmin ? "Twoje dane indywidualne" : "Twoje podsumowanie"}
               </h3>
-            </div>
             <div className="grid grid-cols-2 gap-2 md:grid-cols-3 lg:grid-cols-4">
               <Card className="relative overflow-hidden">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
