@@ -8,3 +8,4 @@ export * from './products';
 export * from './services';
 export * from './start';
 export * from './dashboard';
+export * from './admin';

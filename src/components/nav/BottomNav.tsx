@@ -13,7 +13,8 @@ import {
   LogOut,
   Settings,
   Menu,
-  X
+  X,
+  Users
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -74,12 +75,12 @@ export default function BottomNav() {
             </Button>
           </SheetTrigger>
 
-          <SheetContent side="bottom" className="h-[90vh] p-0">
+          <SheetContent side="bottom" className="h-[90vh] p-0 overflow-y-scroll">
             <SheetHeader className="p-6 pb-4">
               <SheetTitle className="text-2xl text-center">Menu</SheetTitle>
             </SheetHeader>
 
-            <div className="flex-1 px-6 space-y-8">
+            <div className="flex-1 px-2 space-y-2">
               {/* Dodaj nową pozycję Section */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-center">Dodaj nową pozycję</h3>
@@ -114,10 +115,8 @@ export default function BottomNav() {
                 </div>
               </div>
 
-              <Separator />
-
               {/* Historia sprzedaży Section */}
-              <div className="space-y-4">
+              <div className="space-y-2">
                 <h3 className="text-lg font-semibold text-center">Historia sprzedaży</h3>
                 
                 <div className="grid grid-cols-3 gap-4">
@@ -150,11 +149,9 @@ export default function BottomNav() {
                 </div>
               </div>
 
-              <Separator />
-
               {/* Ustawienia Section */}
               {session && (
-                <div className="space-y-4">
+                <div className="space-y-2">
                   <h3 className="text-lg font-semibold text-center">Ustawienia</h3>
                   
                   <div className="flex justify-center">
@@ -168,6 +165,24 @@ export default function BottomNav() {
                     </SheetClose>
                   </div>
                 </div>
+              )}
+
+              {/* Admin Section - Only for ADMIN role */}
+              {session && session.user.role === "ADMIN" && (
+                  <div className="space-y-2 bg-green-500/30 p-4 rounded-lg border border-green-500/30">
+                    <h3 className="text-lg font-semibold text-center">Administracja</h3>
+                    
+                    <div className="flex justify-center">
+                      <SheetClose asChild>
+                        <Link href="/admin/pracownicy" className="w-full max-w-xs">
+                          <Button variant="outline" className="h-16 w-full flex gap-3 border-2 hover:border-primary">
+                            <Users className="h-5 w-5" />
+                            <span className="text-sm">Zarządzanie pracownikami</span>
+                          </Button>
+                        </Link>
+                      </SheetClose>
+                    </div>
+                  </div>
               )}
             </div>
 
