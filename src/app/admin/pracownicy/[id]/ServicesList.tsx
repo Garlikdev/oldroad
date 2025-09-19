@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { removeServiceFromUser } from "@/lib/actions/admin";
 import { toast } from "sonner";
 import { Award, Trash2 } from "lucide-react";

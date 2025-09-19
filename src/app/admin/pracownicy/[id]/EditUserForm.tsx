@@ -52,7 +52,7 @@ export default function EditUserForm({ user }: EditUserFormProps) {
       } else {
         toast.error(result.error || "Nie udało się zaktualizować danych");
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error("Wystąpił błąd podczas aktualizacji danych");
     } finally {
       setIsSubmitting(false);

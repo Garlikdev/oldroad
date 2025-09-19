@@ -211,7 +211,7 @@ export default function ServiceManagement({ userId, allServices, userPrices }: S
         toast.info("Brak zmian do zapisania");
       }
       
-    } catch (error) {
+    } catch (_error) {
       toast.error("Wystąpił błąd podczas zapisywania zmian");
     } finally {
       setIsSubmitting(false);

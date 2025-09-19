@@ -69,7 +69,7 @@ export default function ServiceAssignment({ userId, services, assignedServiceIds
       } else {
         toast.error(result.error || "Nie udało się przypisać usługi");
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error("Wystąpił błąd podczas przypisywania usługi");
     } finally {
       setIsSubmitting(false);

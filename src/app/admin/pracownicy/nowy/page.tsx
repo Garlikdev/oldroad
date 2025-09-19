@@ -42,7 +42,7 @@ export default function NewWorkerPage() {
       } else {
         toast.error(result.error || "Nie udało się utworzyć pracownika");
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error("Wystąpił błąd podczas tworzenia pracownika");
     } finally {
       setIsSubmitting(false);

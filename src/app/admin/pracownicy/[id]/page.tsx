@@ -1,10 +1,10 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { getUserByIdWithAllServices, getAllServices } from "@/lib/actions/admin";
-import { ArrowLeft, User, Award } from "lucide-react";
+import { ArrowLeft, User } from "lucide-react";
 import ServiceManagement from "./ServiceManagement";
 import EditUserForm from "./EditUserForm";
 
