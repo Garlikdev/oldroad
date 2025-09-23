@@ -36,7 +36,7 @@ export default async function RootLayout({
       lang="pl"
       suppressHydrationWarning
     >
-      <body className="flex min-h-[100dvh] flex-col items-center font-sans antialiased sm:min-h-screen">
+      <body className="min-h-screen flex flex-col font-sans antialiased">
         <Providers>
           <HydrationBoundary state={dehydrate(queryClient)}>
             <ThemeProvider
@@ -46,7 +46,7 @@ export default async function RootLayout({
               disableTransitionOnChange
             >
               <TopNav />
-              <main className="w-full max-w-3xl flex-grow px-4 pt-4 text-xl">
+              <main className="flex-1 w-full max-w-3xl mx-auto px-4 pt-4 text-xl">
                 {children}
               </main>
               <BottomNav />

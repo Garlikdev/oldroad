@@ -49,7 +49,7 @@ export default function BottomNav() {
 
   return (
     <nav className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky bottom-0 z-50 w-full border-t border-border/40 shadow-lg">
-      <div className="flex h-16 w-full items-center justify-around px-2 pb-safe">
+      <div className="flex h-16 w-full items-center justify-around px-2">
         {/* Home Button */}
         <Link href="/" className="flex flex-col items-center justify-center">
           <Button
@@ -269,9 +269,6 @@ export default function BottomNav() {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-
-      {/* Safe area for devices with home indicator */}
-      <div className="h-safe-area-inset-bottom" />
     </nav>
   );
 }

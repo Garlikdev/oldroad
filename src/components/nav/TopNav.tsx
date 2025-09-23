@@ -14,15 +14,14 @@ export default function TopNav() {
   const userName = session?.user?.name || "Barber";
 
   return (
-    <header className="border-b bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50 sticky top-0 z-10 w-full">
-      <div className="w-full px-4 py-4">
+    <header className="border-b bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50 sticky top-0 z-50 w-full pt-safe">
+      <div className="w-full px-2 py-2">
         <div className="flex items-center justify-between max-w-none">
           <div className="flex items-center space-x-3">
             <Link href="/" className="flex items-center space-x-2">
-              <BarChart3 className="h-8 w-8 text-primary" />
+              <BarChart3 className="h-4 w-4 text-primary" />
               <div>
-                <h1 className="text-2xl font-bold tracking-tight">OldRoad</h1>
-                <p className="text-sm text-muted-foreground">System zarządzania barberem</p>
+                <h1 className="text-sm font-bold tracking-tight">OldRoad</h1>
               </div>
             </Link>
           </div>
